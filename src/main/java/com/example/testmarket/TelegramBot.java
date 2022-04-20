@@ -1,4 +1,4 @@
-package bot;
+package com.example.testmarket;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -10,12 +10,12 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.Random;
 
 @Component
-public class Bot extends TelegramLongPollingBot {
+public class TelegramBot extends TelegramLongPollingBot {
 
-    @Value("${bot_name}")
+    @Value("${bot.name}")
     private String botUserName;
 
-    @Value("${bot_token}")
+    @Value("${bot.token}")
     private String botToken;
 
     @Override
