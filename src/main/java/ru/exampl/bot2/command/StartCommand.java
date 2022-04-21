@@ -1,4 +1,4 @@
-package ru.exampl.bot2;
+package ru.exampl.bot2.command;
 
 import lombok.Builder;
 import lombok.Data;
