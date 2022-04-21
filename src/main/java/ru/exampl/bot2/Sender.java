@@ -18,11 +18,12 @@ public class Sender extends DefaultAbsSender {
 
     @Override
     public String getBotToken() {
-        return null;
+        return token;
     }
 
-    public void send() throws TelegramApiException {
-        SendMessage sendMessage = new SendMessage();
+    public void send(SendMessage sendMessage) throws TelegramApiException {
+//        SendMessage sendMessage = new SendMessage(chatId, message);
         execute(sendMessage);
+        System.out.println("!!!!" + token);
     }
 }
