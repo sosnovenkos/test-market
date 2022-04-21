@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
@@ -22,8 +23,9 @@ public class Sender extends DefaultAbsSender {
     }
 
     public void send(SendMessage sendMessage) throws TelegramApiException {
-//        SendMessage sendMessage = new SendMessage(chatId, message);
+//        SendMessage sendMessage = new SendMessage(chatId, s);
         execute(sendMessage);
-        System.out.println("!!!!" + token);
+//        System.out.println(message + token);
+//        return message.toString();
     }
 }

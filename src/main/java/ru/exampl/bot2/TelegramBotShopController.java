@@ -16,15 +16,19 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @AllArgsConstructor
 public class TelegramBotShopController{
     private final BotCommandService service;
-    private final ApplicationContext context;
     @PostMapping("/1")
-    public String onUpdateReceived(@RequestBody Update update) throws TelegramApiException {
-        log.info(context.toString());
-//        log.info(update.toString());
-        if (update.getMessage().getText().equals("start")) {
-            StartCommand command = StartCommand.builder().build();
+    public void onUpdateReceived(@RequestBody Update update) throws TelegramApiException {
+//        service.handle(update.getMessage().getChatId().toString(), update.getMessage().getText());
+//        log.info(context.toString());
+        log.info("Received update with message"+update.getMessage().getText());
+        if (update.getMessage().getText().equalsIgnoreCase("start")) {
+            StartCommand command = StartCommand.builder()
+                    .chatId(update.getMessage().getChatId().toString())
+                    .userName(update.getMessage().getChat().getUserName())
+                    .build();
+//            StartCommand command = new StartCommand();
+//            command.setChatId(update.getMessage().getChatId().toString());
             service.handle(command);
         }
-        return "";
     }
 }
