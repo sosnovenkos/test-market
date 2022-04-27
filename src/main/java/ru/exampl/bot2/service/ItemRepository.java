@@ -1,6 +1,6 @@
-package ru.exampl.bot2;
+package ru.exampl.bot2.service;
 
-import ru.exampl.bot2.command.Item;
+import ru.exampl.bot2.domain.Item;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package ru.exampl.bot2;
+package ru.exampl.bot2.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,10 +9,12 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.exampl.bot2.command.HistoryCommand;
-import ru.exampl.bot2.command.Item;
-import ru.exampl.bot2.command.MenuCommand;
-import ru.exampl.bot2.command.StartCommand;
+import ru.exampl.bot2.domain.Order;
+import ru.exampl.bot2.sender.Sender;
+import ru.exampl.bot2.domain.command.HistoryCommand;
+import ru.exampl.bot2.domain.Item;
+import ru.exampl.bot2.domain.command.MenuCommand;
+import ru.exampl.bot2.domain.command.StartCommand;
 
 import java.util.ArrayList;
 import java.util.List;

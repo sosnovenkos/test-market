@@ -1,12 +1,13 @@
-package ru.exampl.bot2;
+package ru.exampl.bot2.store;
 
 import org.springframework.stereotype.Repository;
-import ru.exampl.bot2.command.Item;
+import ru.exampl.bot2.domain.Item;
+import ru.exampl.bot2.service.ItemRepository;
 
 import java.util.List;
 
 @Repository
-public class ItemRepositoryImpl implements ItemRepository{
+public class ItemRepositoryImpl implements ItemRepository {
     public Item tvSony = Item.builder().name("TV Sony").price(120).build();
     public Item pc = Item.builder().name("PC").price(120).build();
     public Item laptopLenovo = Item.builder().name("Laptop Lenovo").price(120).build();

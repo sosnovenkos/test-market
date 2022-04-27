@@ -1,10 +1,8 @@
-package ru.exampl.bot2;
+package ru.exampl.bot2.store;
 
-import lombok.Data;
 import org.springframework.stereotype.Repository;
-import ru.exampl.bot2.Order;
-import ru.exampl.bot2.OrderRepository;
-import ru.exampl.bot2.command.Item;
+import ru.exampl.bot2.domain.Order;
+import ru.exampl.bot2.service.OrderRepository;
 
 import java.util.*;
 

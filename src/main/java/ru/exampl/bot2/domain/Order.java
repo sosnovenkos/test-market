@@ -1,8 +1,7 @@
-package ru.exampl.bot2;
+package ru.exampl.bot2.domain;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.exampl.bot2.command.Item;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package ru.exampl.bot2.command;
+package ru.exampl.bot2.domain.command;
 
 import lombok.Builder;
 import lombok.Data;

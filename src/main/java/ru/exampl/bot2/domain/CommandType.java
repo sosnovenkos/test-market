@@ -1,13 +1,11 @@
-package ru.exampl.bot2.command;
+package ru.exampl.bot2.domain;
 
 import lombok.AllArgsConstructor;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
-public enum Command {
+public enum CommandType {
     START(List.of("start", "старт")),
     HISTORY(List.of("history", "история")),
     MENU(List.of("menu", "меню")),
@@ -15,9 +13,9 @@ public enum Command {
 
     private final List<String> title;
 
-    public static Command findById(String name) {
-        var listOfEnums = Command.values();
-        for (Command command : listOfEnums) {
+    public static CommandType findById(String name) {
+        var listOfEnums = CommandType.values();
+        for (CommandType command : listOfEnums) {
             var list = command.title;
             if (list.contains(name)) {
                 return command;

@@ -1,4 +1,4 @@
-package ru.exampl.bot2;
+package ru.exampl.bot2.api;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,12 +6,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.exampl.bot2.command.Command;
-import ru.exampl.bot2.command.HistoryCommand;
-import ru.exampl.bot2.command.StartCommand;
+import ru.exampl.bot2.sender.Sender;
+import ru.exampl.bot2.domain.CommandType;
+import ru.exampl.bot2.domain.command.HistoryCommand;
+import ru.exampl.bot2.domain.command.StartCommand;
+import ru.exampl.bot2.service.BotCommandService;
 
 //import static jdk.javadoc.internal.tool.Main.execute;
 
@@ -27,7 +28,7 @@ public class TelegramBotShopController {
 //        log.info(context.toString());
 //        log.info("Received update with message" + update.getMessage().getText());
         if (update.hasMessage() && update.getMessage().hasText()) {
-            switch (Command.findById(update.getMessage().getText().toLowerCase())) {
+            switch (CommandType.findById(update.getMessage().getText().toLowerCase())) {
                 case START:
                     StartCommand startCommand = StartCommand.builder()
                             .chatId(update.getMessage().getChatId().toString())

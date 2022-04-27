@@ -1,4 +1,4 @@
-package ru.exampl.bot2;
+package ru.exampl.bot2.sender;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
