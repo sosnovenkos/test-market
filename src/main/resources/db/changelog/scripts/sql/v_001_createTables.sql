@@ -4,7 +4,7 @@
 
 CREATE SCHEMA IF NOT EXISTS test_market;
 
-CREATE TABLE IF NOT EXISTS action
+CREATE TABLE IF NOT EXISTS test_market.action
 (
     id           UUID PRIMARY KEY NOT NULL,
     user_id      INT,
