@@ -1,5 +1,6 @@
 package ru.exampl.bot2.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -25,28 +26,21 @@ public class BotCommandService {
     private final Sender sender;
     private final OrderRepository orderRepository;
     private final ItemRepository itemRepository;
+    private final MessageFactory messageFactory;
+    private final VClientRepositoryImpl vClientRepositoryImpl;
 
-    public void handleStart(StartCommand command) throws TelegramApiException {
-        SendMessage sendMessage = new SendMessage(command.chatId, command.userName + ", добрый день!");
-        sender.send(sendMessage);
-        KeyboardButton history = new KeyboardButton("History");
-        KeyboardButton menu = new KeyboardButton("Menu");
-        List<KeyboardButton> keyboardButtons1 = new ArrayList<>();
-        keyboardButtons1.add(history);
-        keyboardButtons1.add(menu);
-        KeyboardRow keyboardRow1 = new KeyboardRow(keyboardButtons1);
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-        keyboardRows.add(keyboardRow1);
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(keyboardRows);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setSelective(true);
-        sendMessage.enableMarkdown(true);
-        sendMessage.setReplyMarkup(replyKeyboardMarkup);
-        sender.send(sendMessage);
+
+    public void handleStart(StartCommand command) throws TelegramApiException, JsonProcessingException {
+        var message = messageFactory.create(command);
+        vClientRepositoryImpl.save(command);
+        sender.send(message);
+
+
+
     }
 
     public void handleHistory(HistoryCommand command) throws TelegramApiException {
-        List<Order> orders = orderRepository.findByUserId(command.userid);
+        List<Order> orders = orderRepository.findByUserId(String.valueOf(command.userId));
         SendMessage sendMessage = new SendMessage(command.chatId, /*command.userid*/"вы потратили очень много");
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         int j = 1;
@@ -63,6 +57,7 @@ public class BotCommandService {
 //        inlineKeyboardMarkup.setKeyboard(rowList);
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
 //        sendMessage.setText(orders.toString());
+        vClientRepositoryImpl.getHistory(command);
         sender.send(sendMessage);
     }
 

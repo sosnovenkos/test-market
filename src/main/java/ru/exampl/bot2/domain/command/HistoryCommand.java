@@ -7,5 +7,5 @@ import lombok.Data;
 @Builder
 public class HistoryCommand {
     public String chatId;
-    public String userid;
+    public Integer userId;
 }

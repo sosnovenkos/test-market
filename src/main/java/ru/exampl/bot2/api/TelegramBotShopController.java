@@ -1,5 +1,6 @@
 package ru.exampl.bot2.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +24,7 @@ public class TelegramBotShopController {
     private final BotCommandService service;
     private final Sender sender;
     @PostMapping("/1")
-    public void onUpdateReceived(@RequestBody Update update) throws TelegramApiException {
+    public void onUpdateReceived(@RequestBody Update update) throws TelegramApiException, JsonProcessingException {
 //        service.handle(update.getMessage().getChatId().toString(), update.getMessage().getText());
 //        log.info(context.toString());
 //        log.info("Received update with message" + update.getMessage().getText());
@@ -31,6 +32,7 @@ public class TelegramBotShopController {
             switch (CommandType.findById(update.getMessage().getText().toLowerCase())) {
                 case START:
                     StartCommand startCommand = StartCommand.builder()
+                            .userId(Math.toIntExact(update.getMessage().getChat().getId()))
                             .chatId(update.getMessage().getChatId().toString())
                             .userName(update.getMessage().getChat().getUserName())
                             .build();
@@ -39,7 +41,7 @@ public class TelegramBotShopController {
                 case HISTORY:
                     HistoryCommand historyCommand = HistoryCommand.builder()
                             .chatId(update.getMessage().getChatId().toString())
-                            .userid(update.getMessage().getChat().getId().toString())
+                            .userId(Math.toIntExact(update.getMessage().getChat().getId()))
                             .build();
                     service.handleHistory(historyCommand);
                     break;
