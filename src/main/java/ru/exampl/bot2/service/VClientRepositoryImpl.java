@@ -12,9 +12,11 @@ import org.springframework.http.converter.json.GsonFactoryBean;
 import org.springframework.stereotype.Repository;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.exampl.bot2.domain.command.AddItemCommand;
 import ru.exampl.bot2.domain.command.HistoryCommand;
 import ru.exampl.bot2.domain.command.StartCommand;
 import ru.exampl.bot2.entity.DbEntityAction;
+import ru.exampl.bot2.entity.DbEntityItems;
 import ru.exampl.bot2.sender.Sender;
 
 import java.time.OffsetDateTime;
@@ -34,7 +36,7 @@ public class VClientRepositoryImpl {
         dbEntityAction.setUserId(command.getUserId());
         dbEntityAction.setUserName(command.getUserName());
         dbEntityAction.setCreatedAt(OffsetDateTime.now());
-        Gson gson = new Gson();
+//        Gson gson = new Gson();
 //        gson.
 //        dbEntityAction.setData(GsonFactoryBean.OBJECT_TYPE_ATTRIBUTE.(objectMapper.writeValueAsString(dbEntityAction)));
         dbEntityAction.setData(objectMapper.writeValueAsString(dbEntityAction));
@@ -46,10 +48,18 @@ public class VClientRepositoryImpl {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(command.getChatId());
         for (DbEntityAction dbEntityAction : vClientJpaRepository.findByUserId(command.getUserId())) {
-            sendMessage.setText(String.valueOf(dbEntityAction));
+            sendMessage.setText(String.valueOf(dbEntityAction.toString()));
             sender.send(sendMessage);
         }
 
+    }
+
+    public void addItem(AddItemCommand command){
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(command.getChatId());
+        DbEntityItems dbEntityItems = new DbEntityItems();
+        sendMessage.setText("Введите код продукта");
+//        dbEntityItems.setProductCode();
     }
 
 

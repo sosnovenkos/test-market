@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -29,6 +30,7 @@ public class TelegramBotShopController {
 //        log.info(context.toString());
 //        log.info("Received update with message" + update.getMessage().getText());
         if (update.hasMessage() && update.getMessage().hasText()) {
+            System.out.println(update.getMessage());
             switch (CommandType.findById(update.getMessage().getText().toLowerCase())) {
                 case START:
                     StartCommand startCommand = StartCommand.builder()
@@ -50,6 +52,7 @@ public class TelegramBotShopController {
                     SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),/*command.userid*/"хватит ТРАТИТЬ!!!!]");
                     sender.send(sendMessage);
                     break;
+
 
             }
         } else if (update.hasCallbackQuery()){

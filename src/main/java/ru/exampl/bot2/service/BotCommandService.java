@@ -5,17 +5,16 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.exampl.bot2.domain.Order;
+import ru.exampl.bot2.domain.command.AddItemCommand;
 import ru.exampl.bot2.sender.Sender;
 import ru.exampl.bot2.domain.command.HistoryCommand;
 import ru.exampl.bot2.domain.Item;
 import ru.exampl.bot2.domain.command.MenuCommand;
 import ru.exampl.bot2.domain.command.StartCommand;
+import wiremock.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,7 @@ public class BotCommandService {
 
 
     public void handleStart(StartCommand command) throws TelegramApiException, JsonProcessingException {
-        var message = messageFactory.create(command);
+        var message = messageFactory.createAdmin(command);
         vClientRepositoryImpl.save(command);
         sender.send(message);
 
@@ -81,6 +80,10 @@ public class BotCommandService {
         }
 //        sendMessage.setText(items.toString());
 //        sender.send(sendMessage);
+    }
+
+    public void handleAddItem (AddItemCommand addItemCommand){
+
     }
 
 }
