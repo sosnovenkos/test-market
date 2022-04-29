@@ -4,8 +4,10 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-//@Builder
-public class MenuCommand {
-    public String orderId;
+public class AddItemToCartCommand {
     public String chatId;
+    public String userId;
+    public String orderId;
+    public String itemId;
+
 }

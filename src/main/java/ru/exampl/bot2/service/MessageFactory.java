@@ -34,7 +34,8 @@ public class MessageFactory {
         for (int i = 0; i < items.size(); i++) {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
                     items.get(i).getName() + "\n" + items.get(i).getDescription() + "\n" + items.get(i).getPrice());
-            inlineKeyboardButton.setCallbackData(String.valueOf(items.get(i).getId()));
+            var cbd = "ADD_TO_CART:" + command.getOrderId() + ":" + items.get(i).getId().toString();
+            inlineKeyboardButton.setCallbackData(cbd);
             List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
             keyboardButtonsRow.add(inlineKeyboardButton);
             rowList.add(keyboardButtonsRow);

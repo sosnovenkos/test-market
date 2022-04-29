@@ -15,6 +15,7 @@ import ru.exampl.bot2.domain.Item;
 import ru.exampl.bot2.store.ActionRepositoryImpl;
 import ru.exampl.bot2.store.ItemRepositoryImpl;
 import ru.exampl.bot2.store.OrderRepositoryImpl;
+import ru.exampl.bot2.store.entity.DbEntityOrders;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,11 +69,17 @@ public class BotCommandService {
 
     public void handleMenu(MenuCommand command) throws TelegramApiException {
         log.info("handleMenu");
+        DbEntityOrders order;
+                order = orderRepository.findOrderInCartStatus();
+//        if (order == null) order = createOrder();
         var items = itemRepository.findAllItems();
+        command.setOrderId(order.getId().toString());
           var message = messageFactory.createMessageForItemsList(command, items);
             sender.sendList(message);
 
     }
+
+    public void
 
     public void handleOrdersItems (String chatId, String userid, int orderNumber) throws TelegramApiException {
         SendMessage sendMessage = new SendMessage();
