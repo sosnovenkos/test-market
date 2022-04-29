@@ -9,7 +9,10 @@ public enum CommandType {
     START(List.of("start", "старт")),
     HISTORY(List.of("history", "история")),
     MENU(List.of("menu", "меню")),
-    ADDITEM(List.of("addItem", "Добавить товар")),
+    ADDITEM(List.of("add Item", "Добавить товар")),
+    DELETEITEM(List.of("delete Item", "Удалить товар")),
+    VIEWORDERS (List.of("view orders", "Посмотреть заказы")),
+    NUMBEROFVISIT (List.of("Кол-во посещений", "Number of visits")),
     UNKNOWN(List.of());
 
     private final List<String> title;

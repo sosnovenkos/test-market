@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class HistoryCommand {
+public class ActionHistoryCommand {
     public String chatId;
     public Integer userId;
 }

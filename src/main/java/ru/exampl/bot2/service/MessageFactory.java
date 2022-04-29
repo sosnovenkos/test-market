@@ -1,20 +1,50 @@
 package ru.exampl.bot2.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.exampl.bot2.domain.Item;
+import ru.exampl.bot2.domain.command.MenuCommand;
 import ru.exampl.bot2.domain.command.StartCommand;
+import ru.exampl.bot2.store.entity.DbEntityItems;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class MessageFactory {
+
+    public List<SendMessage> createMessageForItemsList(MenuCommand command, List<DbEntityItems> items){
+        log.info("createMessageForItemsList");
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setText("Нажимайте на кнопки для добавления в корзину");
+        sendMessage.setChatId(command.chatId);
+        List<SendMessage> sendMessageList = new ArrayList<>();
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        for (int i = 0; i < items.size(); i++) {
+            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
+                    items.get(i).getName() + "\n" + items.get(i).getDescription() + "\n" + items.get(i).getPrice());
+            inlineKeyboardButton.setCallbackData(String.valueOf(items.get(i).getId()));
+            List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
+            keyboardButtonsRow.add(inlineKeyboardButton);
+            rowList.add(keyboardButtonsRow);
+        }
+            inlineKeyboardMarkup.setKeyboard(rowList);
+            sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+            sendMessageList.add(sendMessage);
+        log.info("sendMessageList size" + sendMessageList.size());
+        return sendMessageList;
+    }
 
     public SendMessage createUser(StartCommand command) throws TelegramApiException {
         SendMessage sendMessage = new SendMessage(command.chatId, command.userName + ", добрый день!");

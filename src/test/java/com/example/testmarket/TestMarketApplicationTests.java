@@ -41,6 +41,7 @@ class TestMarketApplicationTests {
 
 	@Test
 	void contextLoads() throws Exception {
+		getUpdate()
 		var update = new Update();//
 		User user = new User(2046100242L,
 				"Anton",

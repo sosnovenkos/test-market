@@ -1,4 +1,4 @@
-package ru.exampl.bot2.entity;
+package ru.exampl.bot2.store.entity;
 
 import lombok.Data;
 

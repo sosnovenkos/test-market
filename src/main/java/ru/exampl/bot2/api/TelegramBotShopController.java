@@ -5,14 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.exampl.bot2.domain.command.MenuCommand;
 import ru.exampl.bot2.sender.Sender;
 import ru.exampl.bot2.domain.CommandType;
-import ru.exampl.bot2.domain.command.HistoryCommand;
+import ru.exampl.bot2.domain.command.ActionHistoryCommand;
 import ru.exampl.bot2.domain.command.StartCommand;
 import ru.exampl.bot2.service.BotCommandService;
 
@@ -29,8 +29,11 @@ public class TelegramBotShopController {
 //        service.handle(update.getMessage().getChatId().toString(), update.getMessage().getText());
 //        log.info(context.toString());
 //        log.info("Received update with message" + update.getMessage().getText());
+
         if (update.hasMessage() && update.getMessage().hasText()) {
-            System.out.println(update.getMessage());
+//            SendMessage sendMessage = new SendMessage();
+//            sendMessage.setChatId(update.getMessage().getChatId().toString());
+//            System.out.println(update.getMessage());
             switch (CommandType.findById(update.getMessage().getText().toLowerCase())) {
                 case START:
                     StartCommand startCommand = StartCommand.builder()
@@ -41,23 +44,30 @@ public class TelegramBotShopController {
                     service.handleStart(startCommand);
                     break;
                 case HISTORY:
-                    HistoryCommand historyCommand = HistoryCommand.builder()
+                    ActionHistoryCommand actionHistoryCommand = ActionHistoryCommand.builder()
                             .chatId(update.getMessage().getChatId().toString())
                             .userId(Math.toIntExact(update.getMessage().getChat().getId()))
                             .build();
-                    service.handleHistory(historyCommand);
+                    service.handleActionHistoryCommand(actionHistoryCommand);
                     break;
                 case MENU:
+                    MenuCommand menuCommand = MenuCommand.builder()
+                            .chatId(update.getMessage().getChatId().toString())
+                            .build();
+                    service.handleMenu(menuCommand);
 //                    System.out.println("!!!!!!!!!!!!!!");
-                    SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),/*command.userid*/"хватит ТРАТИТЬ!!!!]");
-                    sender.send(sendMessage);
+//                    SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),/*command.userid*/"хватит ТРАТИТЬ!!!!]");
+//                    sender.send(sendMessage);
+//                    sendMessage.setText(/*command.userid*/"хватит ТРАТИТЬ!!!!]");
                     break;
+                case ADDITEM:
+////                    sendMessage.setChatId(update.getMessage().getChatId().toString());
+//                    sendMessage.setText(/*command.userid*/"Добавьте товар");
+//                    sender.send(sendMessage);
 
 
             }
         } else if (update.hasCallbackQuery()){
-//            System.out.println(1111111);
-
             SendMessage sendMessage = new SendMessage();
             String orderNumber = update.getCallbackQuery().getData();
             String chatId = update.getCallbackQuery().getMessage().getChatId().toString();

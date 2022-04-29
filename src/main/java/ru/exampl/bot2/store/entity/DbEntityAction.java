@@ -1,4 +1,4 @@
-package ru.exampl.bot2.entity;
+package ru.exampl.bot2.store.entity;
 
 import com.google.gson.Gson;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;

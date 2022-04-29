@@ -8,6 +8,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.List;
+
 @Component
 public class Sender extends DefaultAbsSender {
     @Value("${bot.token}")
@@ -25,6 +27,15 @@ public class Sender extends DefaultAbsSender {
     public void send(SendMessage sendMessage) throws TelegramApiException {
 //        SendMessage sendMessage = new SendMessage(chatId, s);
         execute(sendMessage);
+//        System.out.println(message + token);
+//        return message.toString();
+    }
+
+    public void sendList(List<SendMessage> sendMessageList) throws TelegramApiException {
+//        SendMessage sendMessage = new SendMessage();
+        for (int i = 0; i < sendMessageList.size(); i++) {
+            execute(sendMessageList.get(i));
+        }
 //        System.out.println(message + token);
 //        return message.toString();
     }
