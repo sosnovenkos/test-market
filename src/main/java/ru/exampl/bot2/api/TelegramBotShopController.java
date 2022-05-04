@@ -28,6 +28,7 @@ import java.util.ArrayList;
 public class TelegramBotShopController {
     private final BotCommandService service;
     private final Sender sender;
+
     @PostMapping("/1")
     public void onUpdateReceived(@RequestBody Update update) throws TelegramApiException, JsonProcessingException {
 //        service.handle(update.getMessage().getChatId().toString(), update.getMessage().getText());
@@ -71,7 +72,7 @@ public class TelegramBotShopController {
 
 
             }
-        } else if (update.hasCallbackQuery()){
+        } else if (update.hasCallbackQuery()) {
 //            if (update.getCallbackQuery().hashCode()){
 //
 //            }
@@ -86,8 +87,9 @@ public class TelegramBotShopController {
             addItemToCartCommand.setItemId(itemId);
             addItemToCartCommand.setChatId(chatId);
             addItemToCartCommand.setUserId(userId);
-            service.handleAddItemToCartCommand(addItemToCartCommand);
+//            service.handleAddItemToCartCommand(addItemToCartCommand);
 
+        }
     }
 }
 

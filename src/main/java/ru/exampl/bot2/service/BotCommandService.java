@@ -79,7 +79,7 @@ public class BotCommandService {
 
     }
 
-    public void
+//    public void
 
     public void handleOrdersItems (String chatId, String userid, int orderNumber) throws TelegramApiException {
         SendMessage sendMessage = new SendMessage();
