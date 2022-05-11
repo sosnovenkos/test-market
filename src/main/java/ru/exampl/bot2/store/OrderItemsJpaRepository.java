@@ -6,6 +6,5 @@ import ru.exampl.bot2.store.entity.DbEntityOrdersItems;
 
 import java.util.UUID;
 
-
-public interface OrderItemsJpaRepository extends JpaRepository<DbEntityOrdersItems, UUID> {
+public interface OrderItemsJpaRepository extends JpaRepository {
 }
