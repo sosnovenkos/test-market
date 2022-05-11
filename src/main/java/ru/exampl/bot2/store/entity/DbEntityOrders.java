@@ -31,8 +31,8 @@ public class DbEntityOrders {
     @Type(type = "jsonb")
     private String items;
 
-    @Column(name = "status")
-    private String status;
+//    @Column(name = "status")
+//    private String status;
 
     @Column(name = "created_at")
     private OffsetDateTime createdAt;

@@ -35,14 +35,19 @@ public class MessageFactory {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
                     items.get(i).getName() + "\n" + items.get(i).getDescription() + "\n" + items.get(i).getPrice());
             var cbd = "ADD_TO_CART:" + command.getOrderId() + ":" + items.get(i).getId().toString();
-            inlineKeyboardButton.setCallbackData(cbd);
+            var getInfo = "GET_INFO:" + items.get(i).getId().toString();
+            inlineKeyboardButton.setCallbackData(getInfo);
+            inlineKeyboardButton.getSwitchInlineQuery();
+            InlineKeyboardButton inlineKeyboardButtonPlus = new InlineKeyboardButton("+");
+            inlineKeyboardButtonPlus.setCallbackData(cbd);
             List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
             keyboardButtonsRow.add(inlineKeyboardButton);
+            keyboardButtonsRow.add(inlineKeyboardButtonPlus);
             rowList.add(keyboardButtonsRow);
         }
-            inlineKeyboardMarkup.setKeyboard(rowList);
-            sendMessage.setReplyMarkup(inlineKeyboardMarkup);
-            sendMessageList.add(sendMessage);
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        sendMessageList.add(sendMessage);
         log.info("sendMessageList size" + sendMessageList.size());
         return sendMessageList;
     }

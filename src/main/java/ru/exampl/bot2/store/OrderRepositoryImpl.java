@@ -3,6 +3,7 @@ package ru.exampl.bot2.store;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import ru.exampl.bot2.domain.Order;
+import ru.exampl.bot2.store.entity.DbEntityItems;
 import ru.exampl.bot2.store.entity.DbEntityOrders;
 
 import java.util.*;
@@ -33,5 +34,9 @@ public class OrderRepositoryImpl{
     public DbEntityOrders findOrderInCartStatus() {
             return orderJpaRepository.findByStatus("CART");
         }
+
+    public DbEntityOrders findOrder(UUID id){
+        return orderJpaRepository.findById(id).get();
+    }
 
     }

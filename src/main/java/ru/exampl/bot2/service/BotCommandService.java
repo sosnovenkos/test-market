@@ -11,14 +11,17 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.exampl.bot2.domain.Order;
 import ru.exampl.bot2.domain.command.*;
 import ru.exampl.bot2.sender.Sender;
-import ru.exampl.bot2.domain.Item;
 import ru.exampl.bot2.store.ActionRepositoryImpl;
 import ru.exampl.bot2.store.ItemRepositoryImpl;
 import ru.exampl.bot2.store.OrderRepositoryImpl;
+import ru.exampl.bot2.store.entity.DbEntityItems;
 import ru.exampl.bot2.store.entity.DbEntityOrders;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
+//import static org.graalvm.compiler.phases.util.GraphOrder.createOrder;
 
 @Slf4j
 @Service
@@ -32,7 +35,7 @@ public class BotCommandService {
 
 
 
-    public void handleStart(StartCommand command) throws TelegramApiException, JsonProcessingException {
+    public void handleStartCommand(StartCommand command) throws TelegramApiException, JsonProcessingException {
 
         var message = messageFactory.createAdmin(command);
         actionRepositoryImpl.save(command);
@@ -67,21 +70,23 @@ public class BotCommandService {
         sender.send(sendMessage);
     }
 
-    public void handleMenu(MenuCommand command) throws TelegramApiException {
-        log.info("handleMenu");
-        DbEntityOrders order;
-                order = orderRepository.findOrderInCartStatus();
-//        if (order == null) order = createOrder();
-        var items = itemRepository.findAllItems();
-        command.setOrderId(order.getId().toString());
-          var message = messageFactory.createMessageForItemsList(command, items);
-            sender.sendList(message);
+//    public void handleMenuCommand(MenuCommand command) throws TelegramApiException {
+//        log.info("handleMenu");
+//        DbEntityOrders order = orderRepository.findOrderInCartStatus();
+//        if (order == null) order = (DbEntityOrders) createOrder();
+//        var items = itemRepository.findAllItems();
+//        command.setOrderId(order.getId().toString());
+//          var message = messageFactory.createMessageForItemsList(command, items);
+//            sender.sendList(message);
+//
+//    }
 
-    }
+//    private Object createOrder() {
+//    }
 
-    public void
+//    public void
 
-    public void handleOrdersItems (String chatId, String userid, int orderNumber) throws TelegramApiException {
+    public void handleOrdersItemsCommand (String chatId, String userid, int orderNumber) throws TelegramApiException {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
 //        List<Item> items = itemRepository.findByOrderNumber(userid, orderNumber);
@@ -98,8 +103,19 @@ public class BotCommandService {
 //        sender.send(sendMessage);
     }
 
-    public void handleAddItem (AddItemCommand addItemCommand){
+    public void handleAddItem (AddItemCommand addItemCommand) throws TelegramApiException {
+        DbEntityOrders order = orderRepository.findOrder(UUID.fromString(addItemCommand.getItemId()));
+        order.setItems();
+        SendMessage sendMessage = new SendMessage(addItemCommand.getChatId(), "заказ добавлен");
+        sender.send(sendMessage);
+    }
 
+    public void handleGetInfoCommand (GetItemInfoCommand getItemInfoCommand) throws TelegramApiException {
+        DbEntityItems item = itemRepository.findItem(UUID.fromString(getItemInfoCommand.getItemId()));
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(getItemInfoCommand.chatId);
+        sendMessage.setText(item.getName() + "\n" + item.getDescription() + "\n" + item.getPrice());
+        sender.send(sendMessage);
     }
 
 }

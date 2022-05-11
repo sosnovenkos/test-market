@@ -19,6 +19,11 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import ru.exampl.bot2.sender.Sender;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -38,6 +43,17 @@ class TestMarketApplicationTests {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Test
+	void df() {
+		var x1 = new ArrayList<String>();
+		var x2 = new LinkedList<String>();
+		var x3 = new HashSet<String>();
+		var z = new ArrayList<Collection>();
+		z.add(x1);
+		z.get(0);
+	}
+
 
 	@Test
 	void contextLoads() throws Exception {

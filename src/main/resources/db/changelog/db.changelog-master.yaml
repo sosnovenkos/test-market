@@ -1,6 +1,6 @@
 databaseChangeLog:
 #  - include:
-#      file: scripts/liqubase_package.xml
+#      file: scripts/liquibase_package.xml
 #      relativeToChangelogFile: true
   - includeAll:
       path: db/changelog/scripts/sql
