@@ -10,5 +10,5 @@ public class StartCommand {
     public String chatId;
     public String userName;
 
-    public Integer userId;
+    public Long userId;
 }

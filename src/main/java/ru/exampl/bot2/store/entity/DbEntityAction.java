@@ -29,7 +29,7 @@ public class DbEntityAction implements Serializable {
     private UUID id;
 
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
     @Column(name = "user_name")
     private String userName;

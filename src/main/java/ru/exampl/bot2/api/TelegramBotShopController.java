@@ -1,6 +1,7 @@
 package ru.exampl.bot2.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,9 +23,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class TelegramBotShopController {
     private final BotCommandService service;
+    private final ObjectMapper objectMapper;
     private final Sender sender;
     @PostMapping("/1")
     public void onUpdateReceived(@RequestBody Update update) throws TelegramApiException, JsonProcessingException {
+        log.info("Received request:\n" + objectMapper.writeValueAsString(update));
 //        service.handle(update.getMessage().getChatId().toString(), update.getMessage().getText());
 //        log.info(context.toString());
 //        log.info("Received update with message" + update.getMessage().getText());
@@ -36,7 +39,7 @@ public class TelegramBotShopController {
             switch (CommandType.findById(update.getMessage().getText().toLowerCase())) {
                 case START:
                     StartCommand startCommand = StartCommand.builder()
-                            .userId(Math.toIntExact(update.getMessage().getChat().getId()))
+                            .userId(update.getMessage().getChat().getId())
                             .chatId(update.getMessage().getChatId().toString())
                             .userName(update.getMessage().getChat().getUserName())
                             .build();
