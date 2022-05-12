@@ -106,10 +106,11 @@ public class BotCommandService {
     }
 
     public void handleAddItem (AddItemCommand addItemCommand) throws TelegramApiException {
-//        DbEntityOrders order = orderRepository.findOrder(UUID.fromString(addItemCommand.getItemId()));
-//        order.setItems();
-//        SendMessage sendMessage = new SendMessage(addItemCommand.getChatId(), "заказ добавлен");
-//        sender.send(sendMessage);
+        DbEntityOrders order = orderRepository.findOrder(UUID.fromString("e289f6c1-fa21-4f97-aac2-ec564c5dae49"));
+//        DbEntityItems item = itemRepository.findItem(UUID.fromString(addItemCommand.getItemId()));
+        order.setItems(String.valueOf(addItemCommand.getItemId()));
+        SendMessage sendMessage = new SendMessage(addItemCommand.getChatId(), "товар добавлен в заказ");
+        sender.send(sendMessage);
     }
 
     public void handleGetInfoCommand (GetItemInfoCommand getItemInfoCommand) throws TelegramApiException {
