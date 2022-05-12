@@ -31,9 +31,9 @@ public class OrderRepositoryImpl{
         return List.of(o1, o2, o3);
     }
 
-    public DbEntityOrders findOrderInCartStatus() {
-            return orderJpaRepository.findByStatus("CART");
-        }
+//    public DbEntityOrders findOrderInCartStatus() {
+////            return orderJpaRepository.findByStatus("CART");
+//        }
 
     public DbEntityOrders findOrder(UUID id){
         return orderJpaRepository.findById(id).get();

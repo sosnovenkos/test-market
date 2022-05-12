@@ -70,16 +70,18 @@ public class BotCommandService {
         sender.send(sendMessage);
     }
 
-//    public void handleMenuCommand(MenuCommand command) throws TelegramApiException {
-//        log.info("handleMenu");
+    public void handleMenuCommand(MenuCommand command) throws TelegramApiException {
+        log.info("handleMenu");
 //        DbEntityOrders order = orderRepository.findOrderInCartStatus();
+//        DbEntityOrders order = orderRepository.findOrder(UUID.fromString("e289f6c1-fa21-4f97-aac2-ec564c5dae49"));
 //        if (order == null) order = (DbEntityOrders) createOrder();
-//        var items = itemRepository.findAllItems();
+//        if (order == null) order = DbEntityOrders.id.toString("e289f6c1-fa21-4f97-aac2-ec564c5dae49");
+        var items = itemRepository.findAllItems();
 //        command.setOrderId(order.getId().toString());
-//          var message = messageFactory.createMessageForItemsList(command, items);
-//            sender.sendList(message);
-//
-//    }
+          var message = messageFactory.createMessageForItemsList(command, items);
+            sender.sendList(message);
+
+    }
 
 //    private Object createOrder() {
 //    }
@@ -104,10 +106,10 @@ public class BotCommandService {
     }
 
     public void handleAddItem (AddItemCommand addItemCommand) throws TelegramApiException {
-        DbEntityOrders order = orderRepository.findOrder(UUID.fromString(addItemCommand.getItemId()));
-        order.setItems();
-        SendMessage sendMessage = new SendMessage(addItemCommand.getChatId(), "заказ добавлен");
-        sender.send(sendMessage);
+//        DbEntityOrders order = orderRepository.findOrder(UUID.fromString(addItemCommand.getItemId()));
+//        order.setItems();
+//        SendMessage sendMessage = new SendMessage(addItemCommand.getChatId(), "заказ добавлен");
+//        sender.send(sendMessage);
     }
 
     public void handleGetInfoCommand (GetItemInfoCommand getItemInfoCommand) throws TelegramApiException {
