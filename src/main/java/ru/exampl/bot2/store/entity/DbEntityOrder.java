@@ -8,6 +8,7 @@ import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -17,7 +18,7 @@ import java.util.UUID;
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 })
 
-public class DbEntityOrders {
+public class DbEntityOrder {
 
     @Id
     @GeneratedValue
@@ -29,7 +30,7 @@ public class DbEntityOrders {
 
     @Column(name = "items")
     @Type(type = "jsonb")
-    private String items;
+    private List<UUID> items;
 
 //    @Column(name = "status")
 //    private String status;

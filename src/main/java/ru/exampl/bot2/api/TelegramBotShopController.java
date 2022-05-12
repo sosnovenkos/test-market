@@ -13,6 +13,8 @@ import ru.exampl.bot2.sender.Sender;
 import ru.exampl.bot2.domain.CommandType;
 import ru.exampl.bot2.service.BotCommandService;
 
+import java.util.UUID;
+
 //import static jdk.javadoc.internal.tool.Main.execute;
 
 @Slf4j
@@ -75,7 +77,7 @@ public class TelegramBotShopController {
             } else if (strings[0].equalsIgnoreCase("ADD_TO_CART")) {
                 AddItemCommand addItemCommand = new AddItemCommand();
                 addItemCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
-                addItemCommand.setItemId(strings[2]);
+                addItemCommand.setItemId(UUID.fromString(strings[2]));
                 service.handleAddItem(addItemCommand);
             }
 //            String cbd = update.getCallbackQuery().getData();
