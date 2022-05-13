@@ -31,7 +31,7 @@ public class ActionRepositoryImpl {
     public void save(StartCommand command) throws JsonProcessingException {
         DbEntityAction dbEntityAction = new DbEntityAction();
         dbEntityAction.setUserId(command.getUserId());
-        dbEntityAction.setUserName(command.getUserName());
+        dbEntityAction.setUserName(command.getFirstName());
         dbEntityAction.setCreatedAt(OffsetDateTime.now());
 //        Gson gson = new Gson();
 //        gson.

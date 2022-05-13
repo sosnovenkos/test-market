@@ -84,10 +84,20 @@ public class BotCommandService {
 
     }
 
-//    private Object createOrder() {
-//    }
+    public void handleBasketCommand (BasketCommand basketCommand) throws TelegramApiException {
+        log.info("handleBasket");
+        DbEntityOrder order = orderRepository.findOrder(UUID.fromString(basketCommand.getOrderId()));
+        if (order != null){
+            List<DbEntityItems> items = new ArrayList<>();
+            for (UUID i: order.getItems()) {
+                items.add(itemRepository.findItem(i));
+            }
+            var message = messageFactory.createMessageForBasket(basketCommand, items);
+            sender.sendList(message);
+            log.info("List<DbEntityItems> items " + items.size());
+        }
+    }
 
-//    public void
 
     public void handleOrdersItemsCommand (String chatId, String userid, int orderNumber) throws TelegramApiException {
         SendMessage sendMessage = new SendMessage();

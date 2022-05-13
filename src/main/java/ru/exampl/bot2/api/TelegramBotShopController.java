@@ -26,7 +26,9 @@ public class TelegramBotShopController {
     private final ObjectMapper objectMapper;
     private final Sender sender;
     @PostMapping("/1")
-    public void onUpdateReceived(@RequestBody Update update) throws TelegramApiException, JsonProcessingException {
+    public void onUpdateReceived(@RequestBody String jsonRequestBody) throws TelegramApiException, JsonProcessingException {
+
+        Update update = objectMapper.readValue(jsonRequestBody, Update.class);
         log.info("Received request:\n" + objectMapper.writeValueAsString(update));
 //        service.handle(update.getMessage().getChatId().toString(), update.getMessage().getText());
 //        log.info(context.toString());
@@ -41,7 +43,7 @@ public class TelegramBotShopController {
                     StartCommand startCommand = StartCommand.builder()
                             .userId(update.getMessage().getChat().getId())
                             .chatId(update.getMessage().getChatId().toString())
-                            .userName(update.getMessage().getChat().getUserName())
+                            .firstName(update.getMessage().getChat().getFirstName())
                             .build();
                     service.handleStartCommand(startCommand);
                     break;
@@ -62,10 +64,18 @@ public class TelegramBotShopController {
 //                    sender.send(sendMessage);
 //                    sendMessage.setText(/*command.userid*/"хватит ТРАТИТЬ!!!!]");
                     break;
+                case BASKET:
+                    BasketCommand basketCommand = new BasketCommand();
+                    basketCommand.setChatId(update.getMessage().getChatId().toString());
+                    basketCommand.setUserid(update.getMessage().getChat().getId().toString());
+                    basketCommand.setOrderId("3228f2aa-f2da-48ee-965c-efb1a5972f44");
+                    service.handleBasketCommand(basketCommand);
+                    break;
                 case ADDITEM:
 ////                    sendMessage.setChatId(update.getMessage().getChatId().toString());
 //                    sendMessage.setText(/*command.userid*/"Добавьте товар");
 //                    sender.send(sendMessage);
+
 
 
             }
