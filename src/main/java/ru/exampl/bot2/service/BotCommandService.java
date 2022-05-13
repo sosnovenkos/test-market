@@ -18,6 +18,7 @@ import ru.exampl.bot2.store.entity.DbEntityItems;
 import ru.exampl.bot2.store.entity.DbEntityOrder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -83,10 +84,20 @@ public class BotCommandService {
 
     }
 
-//    private Object createOrder() {
-//    }
+    public void handleBasketCommand (BasketCommand basketCommand) throws TelegramApiException {
+        log.info("handleBasket");
+        DbEntityOrder order = orderRepository.findOrder(UUID.fromString(basketCommand.getOrderId()));
+        if (order != null){
+            List<DbEntityItems> items = new ArrayList<>();
+            for (UUID i: order.getItems()) {
+                items.add(itemRepository.findItem(i));
+            }
+            var message = messageFactory.createMessageForBasket(basketCommand, items);
+            log.info("List<DbEntityItems> items " + items.size());
+            sender.sendList(message);
+        }
+    }
 
-//    public void
 
     public void handleOrdersItemsCommand (String chatId, String userid, int orderNumber) throws TelegramApiException {
         SendMessage sendMessage = new SendMessage();
@@ -106,8 +117,13 @@ public class BotCommandService {
     }
 
     public void handleAddItem (AddItemCommand addItemCommand) throws TelegramApiException {
-        DbEntityOrder order = orderRepository.findOrder(addItemCommand.getOrderId());
-        order.getItems().add(addItemCommand.getItemId());
+//        DbEntityOrder order = orderRepository.findOrder(addItemCommand.getOrderId());
+        DbEntityOrder order = orderRepository.findOrder(UUID.fromString("3228f2aa-f2da-48ee-965c-efb1a5972f44"));
+        if (order.getItems() == null){
+            order.setItems(List.of(addItemCommand.getItemId()));
+        } else {
+            order.getItems().add(addItemCommand.getItemId());
+        }
         orderRepository.saveOrder(order);
 //        DbEntityItems item = itemRepository.findItem(UUID.fromString(addItemCommand.getItemId()));
         SendMessage sendMessage = new SendMessage(addItemCommand.getChatId(), "товар добавлен в заказ");

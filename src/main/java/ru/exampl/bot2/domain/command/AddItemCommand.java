@@ -11,5 +11,5 @@ import java.util.UUID;
 public class AddItemCommand {
     public String chatId;
     public UUID itemId;
-    public UUID orderId;
+//    public UUID orderId;
 }

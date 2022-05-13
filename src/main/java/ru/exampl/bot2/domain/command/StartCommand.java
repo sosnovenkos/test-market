@@ -8,7 +8,7 @@ import lombok.Data;
 //@NoArgsConstructor
 public class StartCommand {
     public String chatId;
-    public String userName;
+    public String firstName;
 
-    public Integer userId;
+    public Long userId;
 }
