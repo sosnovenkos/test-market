@@ -93,8 +93,8 @@ public class BotCommandService {
                 items.add(itemRepository.findItem(i));
             }
             var message = messageFactory.createMessageForBasket(basketCommand, items);
-            sender.sendList(message);
             log.info("List<DbEntityItems> items " + items.size());
+            sender.sendList(message);
         }
     }
 

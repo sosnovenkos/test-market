@@ -58,18 +58,18 @@ public class MessageFactory {
         log.info("createMessageForBasket");
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText("Проверьте заказ");
-        sendMessage.setChatId(basketCommand.chatId);
+        sendMessage.setChatId(basketCommand.getChatId());
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         for (int i = 0; i < items.size(); i++) {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
-                    items.get(i).getName() + "\n" + items.get(i).getDescription() + "\n" + items.get(i).getPrice());
-            var cbd = "DELETE_TO_CART:" + basketCommand.getOrderId() + ":" + items.get(i).getId().toString();
+                    items.get(i).getName() /*+ "\n" + items.get(i).getDescription() + "\n" + items.get(i).getPrice()*/);
+            var cbd = "DELETE:"/* + basketCommand.getOrderId() + ":" + items.get(i).getId().toString()*/;
             var getInfo = "GET_INFO:" + items.get(i).getId().toString();
             inlineKeyboardButton.setCallbackData(getInfo);
             inlineKeyboardButton.getSwitchInlineQuery();
-            InlineKeyboardButton inlineKeyboardButtonMinus = new InlineKeyboardButton("-");
+            InlineKeyboardButton inlineKeyboardButtonMinus = new InlineKeyboardButton("del");
             inlineKeyboardButtonMinus.setCallbackData(cbd);
             List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
             keyboardButtonsRow.add(inlineKeyboardButton);
