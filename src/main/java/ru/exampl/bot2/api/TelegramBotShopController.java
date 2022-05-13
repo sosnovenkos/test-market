@@ -6,19 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.exampl.bot2.domain.command.AddItemToCartCommand;
-import ru.exampl.bot2.domain.command.MenuCommand;
+import ru.exampl.bot2.domain.command.*;
 import ru.exampl.bot2.sender.Sender;
 import ru.exampl.bot2.domain.CommandType;
-import ru.exampl.bot2.domain.command.ActionHistoryCommand;
-import ru.exampl.bot2.domain.command.StartCommand;
 import ru.exampl.bot2.service.BotCommandService;
 
-import java.util.ArrayList;
+import java.util.UUID;
 
 //import static jdk.javadoc.internal.tool.Main.execute;
 
@@ -28,7 +23,6 @@ import java.util.ArrayList;
 public class TelegramBotShopController {
     private final BotCommandService service;
     private final Sender sender;
-
     @PostMapping("/1")
     public void onUpdateReceived(@RequestBody Update update) throws TelegramApiException, JsonProcessingException {
 //        service.handle(update.getMessage().getChatId().toString(), update.getMessage().getText());
@@ -46,7 +40,7 @@ public class TelegramBotShopController {
                             .chatId(update.getMessage().getChatId().toString())
                             .userName(update.getMessage().getChat().getUserName())
                             .build();
-                    service.handleStart(startCommand);
+                    service.handleStartCommand(startCommand);
                     break;
                 case HISTORY:
                     ActionHistoryCommand actionHistoryCommand = ActionHistoryCommand.builder()
@@ -59,7 +53,7 @@ public class TelegramBotShopController {
                     MenuCommand menuCommand = new MenuCommand();
                     menuCommand.setChatId(update.getMessage().getChatId().toString());
 
-                    service.handleMenu(menuCommand);
+                    service.handleMenuCommand(menuCommand);
 //                    System.out.println("!!!!!!!!!!!!!!");
 //                    SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),/*command.userid*/"хватит ТРАТИТЬ!!!!]");
 //                    sender.send(sendMessage);
@@ -73,20 +67,30 @@ public class TelegramBotShopController {
 
             }
         } else if (update.hasCallbackQuery()) {
-//            if (update.getCallbackQuery().hashCode()){
-//
-//            }
-            String cbd = update.getCallbackQuery().getData();
-            String[] strings = cbd.split(":");
-            String orderId = strings[1];
-            String itemId = strings[2];
-            AddItemToCartCommand addItemToCartCommand = new AddItemToCartCommand();
-            String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
-            String userId = update.getCallbackQuery().getId();
-            addItemToCartCommand.setOrderId(orderId);
-            addItemToCartCommand.setItemId(itemId);
-            addItemToCartCommand.setChatId(chatId);
-            addItemToCartCommand.setUserId(userId);
+            String [] strings = update.getCallbackQuery().getData().split(":");
+            if (strings[0].equalsIgnoreCase("GET_INFO")){
+                GetItemInfoCommand getItemInfoCommand = new GetItemInfoCommand();
+                getItemInfoCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
+                getItemInfoCommand.setItemId(strings[1]);
+                service.handleGetInfoCommand(getItemInfoCommand);
+
+            } else if (strings[0].equalsIgnoreCase("ADD_TO_CART")) {
+                AddItemCommand addItemCommand = new AddItemCommand();
+                addItemCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
+                addItemCommand.setItemId(UUID.fromString(strings[2]));
+                service.handleAddItem(addItemCommand);
+            }
+//            String cbd = update.getCallbackQuery().getData();
+//            String[] strings = cbd.split(":");
+//            String orderId = strings[1];
+//            String itemId = strings[2];
+//            AddItemToCartCommand addItemToCartCommand = new AddItemToCartCommand();
+//            String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+//            String userId = update.getCallbackQuery().getId();
+//            addItemToCartCommand.setOrderId(orderId);
+//            addItemToCartCommand.setItemId(itemId);
+//            addItemToCartCommand.setChatId(chatId);
+//            addItemToCartCommand.setUserId(userId);
 //            service.handleAddItemToCartCommand(addItemToCartCommand);
 
         }
