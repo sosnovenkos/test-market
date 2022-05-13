@@ -1,0 +1,13 @@
+---
+version: '3'
+services:
+  postgresql:
+    image: postgres:12-alpine
+    container_name: client-man
+    ports:
+      - 5440:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "pwd"
+      POSTGRES_DB: test
+      POSTGRES_HOST_AUTH_METHOD: trust
