@@ -1,11 +1,12 @@
 package ru.exampl.bot2.domain.command;
 
-import lombok.Builder;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
-//@Builder
-public class MenuCommand {
-    public Long userId;
+public class DelItemCommand {
+    public UUID itemId;
     public String chatId;
+
 }

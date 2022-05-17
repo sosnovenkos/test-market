@@ -6,5 +6,5 @@ import ru.exampl.bot2.store.entity.DbEntityOrder;
 import java.util.UUID;
 
 public interface OrderJpaRepository extends JpaRepository<DbEntityOrder, UUID> {
-//    DbEntityOrder findByStatus(String status);
+    DbEntityOrder findByStatusAndUserId(String status, Long userId);
 }

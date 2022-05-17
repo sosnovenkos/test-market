@@ -26,14 +26,14 @@ public class DbEntityOrder {
     private UUID id;
 
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
     @Column(name = "items")
     @Type(type = "jsonb")
     private List<UUID> items;
 
-//    @Column(name = "status")
-//    private String status;
+    @Column(name = "status")
+    private String status;
 
     @Column(name = "created_at")
     private OffsetDateTime createdAt;

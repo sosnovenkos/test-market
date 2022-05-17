@@ -9,7 +9,7 @@ import ru.exampl.bot2.store.entity.DbEntityOrder;
 import java.util.*;
 
 @Repository
-public class OrderRepositoryImpl{
+public class OrderRepositoryImpl {
     @Autowired
     private OrderJpaRepository orderJpaRepository;
     public Order o1 = Order.builder().items(List.of()).date(new GregorianCalendar().getTime().toString()).sum("2569").build();
@@ -17,17 +17,6 @@ public class OrderRepositoryImpl{
     public Order o3 = Order.builder().items(List.of()).date("22.08.2019").sum("1566").build();
 
     public List<Order> findByUserId(String userid) {
-//        var tvSony = Item.builder().name("TV Sony").price(120).build();
-//        var pc = Item.builder().name("PC").price(120).build();
-//        var laptopLenovo = Item.builder().name("Laptop Lenovo").price(120).build();
-//        var laptopHp = Item.builder().name("Laptop HP").price(120).build();
-//        var tabletHuawei = Item.builder().name("Tablet Huawei").price(120).build();
-//        var tvPanasonic = Item.builder().name("TV Panasonic").price(120).build();
-//        var smartWatch = Item.builder().name("Smart watch").price(120).build();
-//        var phoneApple = Item.builder().name("Phone Apple").price(120).build();
-//        var o1 = Order.builder().items(List.of(tvSony, pc, smartWatch)).date(new GregorianCalendar().getTime().toString()).sum("2569").build();
-//        var o2 = Order.builder().items(List.of(laptopLenovo, tabletHuawei, phoneApple)).date(new GregorianCalendar().getTime().toString()).sum("1236").build();
-//        var o3 = Order.builder().items(List.of(laptopHp, tvPanasonic)).date("22.08.2019").sum("1566").build();
         return List.of(o1, o2, o3);
     }
 
@@ -35,14 +24,16 @@ public class OrderRepositoryImpl{
 ////            return orderJpaRepository.findByStatus("CART");
 //        }
 
-    public DbEntityOrder findOrder(UUID id){
+    public DbEntityOrder findOrder(UUID id) {
         return orderJpaRepository.findById(id).get();
     }
 
 
-    public DbEntityOrder saveOrder(DbEntityOrder order){
+    public DbEntityOrder saveOrder(DbEntityOrder order) {
         return orderJpaRepository.save(order);
     }
 
-
+    public DbEntityOrder findOrderInCartStatus(Long userId) {
+        return orderJpaRepository.findByStatusAndUserId("CART", userId);
     }
+}

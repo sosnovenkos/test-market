@@ -10,6 +10,7 @@ import java.util.UUID;
 //@Builder
 public class AddItemCommand {
     public String chatId;
+    public UUID userId;
     public UUID itemId;
-//    public UUID orderId;
+    public UUID orderId;
 }

@@ -57,7 +57,7 @@ public class TelegramBotShopController {
                 case MENU:
                     MenuCommand menuCommand = new MenuCommand();
                     menuCommand.setChatId(update.getMessage().getChatId().toString());
-
+                    menuCommand.setUserId(update.getMessage().getFrom().getId());
                     service.handleMenuCommand(menuCommand);
 //                    System.out.println("!!!!!!!!!!!!!!");
 //                    SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),/*command.userid*/"хватит ТРАТИТЬ!!!!]");
@@ -90,8 +90,15 @@ public class TelegramBotShopController {
             } else if (strings[0].equalsIgnoreCase("ADD_TO_CART")) {
                 AddItemCommand addItemCommand = new AddItemCommand();
                 addItemCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
+//                addItemCommand.setUserId(update.getCallbackQuery());
+//                addItemCommand.setOrderId();
                 addItemCommand.setItemId(UUID.fromString(strings[2]));
                 service.handleAddItem(addItemCommand);
+            } else if (strings[0].equalsIgnoreCase("DELETE")) {
+                DelItemCommand delItemCommand = new DelItemCommand();
+                delItemCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
+                delItemCommand.setItemId(UUID.fromString(strings[1]));
+                service.handleDelItem(delItemCommand);
             }
 //            String cbd = update.getCallbackQuery().getData();
 //            String[] strings = cbd.split(":");
