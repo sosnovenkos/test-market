@@ -57,7 +57,7 @@ public class TelegramBotShopController {
                 case MENU:
                     MenuCommand menuCommand = new MenuCommand();
                     menuCommand.setChatId(update.getMessage().getChatId().toString());
-                    menuCommand.setUserId(update.getMessage().getFrom().getId());
+//                    menuCommand.setUserId(update.getMessage().getFrom().getId());
                     service.handleMenuCommand(menuCommand);
 //                    System.out.println("!!!!!!!!!!!!!!");
 //                    SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),/*command.userid*/"хватит ТРАТИТЬ!!!!]");

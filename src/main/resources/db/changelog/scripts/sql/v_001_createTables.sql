@@ -37,10 +37,7 @@ CREATE TABLE IF NOT EXISTS test_market.orders
     id              UUID PRIMARY KEY NOT NULL,
     user_id         BIGINT,
     items           jsonb,
-    created_at      TIMESTAMP,
-    CONSTRAINT fk_orders_user_id FOREIGN KEY (user_id)
-        REFERENCES test_market.users (user_id)
---     CONSTRAINT fk_orders_items FOREIGN KEY (items)
+    created_at      TIMESTAMP
 --         REFERENCES test_market.items MATCH FULL (product_code)
 );
 
