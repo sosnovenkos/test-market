@@ -18,11 +18,13 @@ import ru.exampl.bot2.store.entity.DbEntityOrder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class MessageFactory {
+
 
     public List<SendMessage> createMessageForItemsList(MenuCommand command, DbEntityOrder order, List<DbEntityItems> items){
         log.info("createMessageForItemsList");
@@ -35,7 +37,7 @@ public class MessageFactory {
         for (int i = 0; i < items.size(); i++) {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
                     items.get(i).getName() + "\n" + items.get(i).getDescription() + "\n" + items.get(i).getPrice());
-            var cbd = "ADD_TO_CART:" + order.getId() + ":" + items.get(i).getId().toString();
+            var cbd = "ADD_TO_CART:" + order.getId() + ":";// + items.get(i).getId().toString();
             var getInfo = "GET_INFO:" + items.get(i).getId().toString();
             inlineKeyboardButton.setCallbackData(getInfo);
             inlineKeyboardButton.getSwitchInlineQuery();

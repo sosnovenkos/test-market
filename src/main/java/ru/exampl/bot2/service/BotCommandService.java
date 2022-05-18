@@ -71,7 +71,11 @@ public class BotCommandService {
 //        inlineKeyboardMarkup.setKeyboard(rowList);
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
 //        sendMessage.setText(orders.toString());
-        sender.send(sendMessage);
+        try {
+            sender.send(sendMessage);
+        } catch (Exception ex) {
+            log.error("YOU BROKE TELEGRAM");
+        }
     }
 
     public void handleMenuCommand(MenuCommand command) throws TelegramApiException {
@@ -88,8 +92,13 @@ public class BotCommandService {
 //        if (order == null) order = DbEntityOrder.id.toString("e289f6c1-fa21-4f97-aac2-ec564c5dae49");
         var items = itemRepository.findAllItems();
 //        command.setOrderId(order.getId().toString());
-          var message = messageFactory.createMessageForItemsList(command, order, items);
+        var message = messageFactory.createMessageForItemsList(command, order, items);
+        try {
             sender.sendList(message);
+        } catch (Exception ex) {
+            log.error("YOU BROKE TELEGRAM: " + ex.getMessage());
+            ex.printStackTrace();
+        }
     }
 
     public void handleBasketCommand (BasketCommand basketCommand) throws TelegramApiException {
@@ -97,12 +106,18 @@ public class BotCommandService {
         DbEntityOrder order = orderRepository.findOrder(UUID.fromString(basketCommand.getOrderId()));
         if (order != null){
             List<DbEntityItems> items = new ArrayList<>();
-            for (UUID i: order.getItems()) {
-                items.add(itemRepository.findItem(i));
+            if (order.getItems() != null) {
+                for (UUID i : order.getItems()) {
+                    items.add(itemRepository.findItem(i));
+                }
             }
             var message = messageFactory.createMessageForBasket(basketCommand, items);
             log.info("List<DbEntityItems> items " + items.size());
-            sender.sendList(message);
+            try {
+                sender.sendList(message);
+            } catch (Exception ex) {
+                log.error("YOU BROKE TELEGRAM");
+            }
         }
     }
 
@@ -136,7 +151,11 @@ public class BotCommandService {
         orderRepository.saveOrder(order);
 //        DbEntityItems item = itemRepository.findItem(UUID.fromString(addItemCommand.getItemId()));
         SendMessage sendMessage = new SendMessage(addItemCommand.getChatId(), "товар добавлен в заказ");
-        sender.send(sendMessage);
+        try {
+            sender.send(sendMessage);
+        } catch (Exception ex) {
+            log.error("YOU BROKE TELEGRAM");
+        }
     }
 
     public void handleDelItem (DelItemCommand delItemCommand) throws TelegramApiException {
@@ -144,7 +163,11 @@ public class BotCommandService {
         order.getItems().remove(delItemCommand.getItemId());
         orderRepository.saveOrder(order);
         SendMessage sendMessage = new SendMessage(delItemCommand.getChatId(), "товар удалён из корзины");
-        sender.send(sendMessage);
+        try {
+            sender.send(sendMessage);
+        } catch (Exception ex) {
+            log.error("YOU BROKE TELEGRAM");
+        }
     }
 
     public void handleGetInfoCommand (GetItemInfoCommand getItemInfoCommand) throws TelegramApiException {
@@ -152,7 +175,11 @@ public class BotCommandService {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(getItemInfoCommand.chatId);
         sendMessage.setText(item.getName() + "\n" + item.getDescription() + "\n" + item.getPrice());
-        sender.send(sendMessage);
+        try {
+            sender.send(sendMessage);
+        } catch (Exception ex) {
+            log.error("YOU BROKE TELEGRAM");
+        }
     }
 
 }
