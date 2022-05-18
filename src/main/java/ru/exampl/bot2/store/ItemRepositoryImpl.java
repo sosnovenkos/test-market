@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import ru.exampl.bot2.store.entity.DbEntityItems;
 
 import java.util.List;
-import java.util.UUID;
+
 
 @Repository
 public class ItemRepositoryImpl {
@@ -16,7 +16,7 @@ public class ItemRepositoryImpl {
         return itemJpaRepository.findAll();
     }
 
-    public DbEntityItems findItem(UUID id){
+    public DbEntityItems findItem(Long id){
         return itemJpaRepository.findById(id).get();
     }
 }

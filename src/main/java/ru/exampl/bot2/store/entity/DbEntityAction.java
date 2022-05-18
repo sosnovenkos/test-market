@@ -12,7 +12,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Date;
-import java.util.UUID;
+
 
 @Data
 @Entity
@@ -24,9 +24,9 @@ import java.util.UUID;
 public class DbEntityAction implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private UUID id;
+    private Long id;
 
     @Column(name = "user_id")
     private Long userId;

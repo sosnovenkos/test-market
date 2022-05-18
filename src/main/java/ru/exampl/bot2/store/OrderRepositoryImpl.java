@@ -24,16 +24,21 @@ public class OrderRepositoryImpl {
 ////            return orderJpaRepository.findByStatus("CART");
 //        }
 
-    public DbEntityOrder findOrder(UUID id) {
+    public DbEntityOrder findOrder(Long id) {
         return orderJpaRepository.findById(id).get();
     }
 
 
     public DbEntityOrder saveOrder(DbEntityOrder order) {
-        return orderJpaRepository.save(order);
+        try {
+            return orderJpaRepository.save(order);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return order;
     }
 
     public DbEntityOrder findOrderInCartStatus(Long userId) {
-        return orderJpaRepository.findByStatusAndUserId("CART", userId);
+        return orderJpaRepository.findByStatusAndUserId("cart", userId);
     }
 }

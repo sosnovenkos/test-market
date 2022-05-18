@@ -10,6 +10,7 @@ public enum CommandType {
     HISTORY(List.of("history", "история")),
     MENU(List.of("menu", "меню")),
     BASKET(List.of("basket", "корзина")),
+    CHECKOUT(List.of("checkout", "оформить заказ")),
     ADDITEM(List.of("add Item", "Добавить товар")),
     DELETEITEM(List.of("delete Item", "Удалить товар")),
     VIEWORDERS (List.of("view orders", "Посмотреть заказы")),

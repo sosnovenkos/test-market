@@ -14,7 +14,6 @@ import ru.exampl.bot2.sender.Sender;
 import ru.exampl.bot2.domain.CommandType;
 import ru.exampl.bot2.service.BotCommandService;
 
-import java.util.UUID;
 
 //import static jdk.javadoc.internal.tool.Main.execute;
 
@@ -57,8 +56,12 @@ public class TelegramBotShopController {
                 case MENU:
                     MenuCommand menuCommand = new MenuCommand();
                     menuCommand.setChatId(update.getMessage().getChatId().toString());
-//                    menuCommand.setUserId(update.getMessage().getFrom().getId());
-                    service.handleMenuCommand(menuCommand);
+                    menuCommand.setUserId(update.getMessage().getFrom().getId());
+                    try {
+                        service.handleMenuCommand(menuCommand);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
 //                    System.out.println("!!!!!!!!!!!!!!");
 //                    SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),/*command.userid*/"хватит ТРАТИТЬ!!!!]");
 //                    sender.send(sendMessage);
@@ -68,13 +71,20 @@ public class TelegramBotShopController {
                     BasketCommand basketCommand = new BasketCommand();
                     basketCommand.setChatId(update.getMessage().getChatId().toString());
                     basketCommand.setUserid(update.getMessage().getChat().getId().toString());
-                    basketCommand.setOrderId("3228f2aa-f2da-48ee-965c-efb1a5972f44");
+//                    basketCommand.setOrderId();
                     service.handleBasketCommand(basketCommand);
+                    break;
+                case CHECKOUT:
+                    CheckoutCommand checkoutCommand = new CheckoutCommand();
+                    checkoutCommand.setChatId(update.getMessage().getChatId().toString());
+                    checkoutCommand.setUserid(update.getMessage().getChat().getId().toString());
+                    service.handleCheckoutCommand(checkoutCommand);
                     break;
                 case ADDITEM:
 ////                    sendMessage.setChatId(update.getMessage().getChatId().toString());
 //                    sendMessage.setText(/*command.userid*/"Добавьте товар");
 //                    sender.send(sendMessage);
+
 
 
 
@@ -90,14 +100,23 @@ public class TelegramBotShopController {
             } else if (strings[0].equalsIgnoreCase("ADD_TO_CART")) {
                 AddItemCommand addItemCommand = new AddItemCommand();
                 addItemCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
-//                addItemCommand.setUserId(update.getCallbackQuery());
+                if (update.getCallbackQuery().getFrom().getId() != null) {
+                    addItemCommand.setUserId(Long.valueOf(update.getCallbackQuery().getFrom().getId()));
+                } else {
+                    addItemCommand.setUserId(Long.valueOf(update.getCallbackQuery().getMessage().getChat().getId()));
+                }
 //                addItemCommand.setOrderId();
-                addItemCommand.setItemId(UUID.fromString(strings[2]));
+                addItemCommand.setItemId(Long.valueOf(strings[2]));
                 service.handleAddItem(addItemCommand);
             } else if (strings[0].equalsIgnoreCase("DELETE")) {
                 DelItemCommand delItemCommand = new DelItemCommand();
                 delItemCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
-                delItemCommand.setItemId(UUID.fromString(strings[1]));
+                if (update.getCallbackQuery().getFrom().getId() != null) {
+                    delItemCommand.setUserId(Long.valueOf(update.getCallbackQuery().getFrom().getId()));
+                } else {
+                    delItemCommand.setUserId(Long.valueOf(update.getCallbackQuery().getMessage().getChat().getId()));
+                }
+                delItemCommand.setItemId(Long.valueOf(strings[1]));
                 service.handleDelItem(delItemCommand);
             }
 //            String cbd = update.getCallbackQuery().getData();

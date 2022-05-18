@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-//@Builder
+//@Builder`
 public class MenuCommand {
     public Long userId;
     public String chatId;

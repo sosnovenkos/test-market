@@ -9,7 +9,7 @@ import org.hibernate.annotations.TypeDefs;
 import javax.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.UUID;
+
 
 @Data
 @Entity
@@ -21,16 +21,16 @@ import java.util.UUID;
 public class DbEntityOrder {
 
     @Id
-    @GeneratedValue
-    @Column(name = "id", nullable = false)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
 
     @Column(name = "user_id")
     private Long userId;
 
     @Column(name = "items")
     @Type(type = "jsonb")
-    private List<UUID> items;
+    private List<Long> items;
 
     @Column(name = "status")
     private String status;

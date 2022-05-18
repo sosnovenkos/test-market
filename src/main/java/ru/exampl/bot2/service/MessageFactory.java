@@ -64,7 +64,7 @@ public class MessageFactory {
         for (int i = 0; i < items.size(); i++) {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
                     items.get(i).getName() + "\n" + items.get(i).getDescription() + "\n" + items.get(i).getPrice());
-            var cbd = "DELETE:" /*+ basketCommand.getOrderId() + ":"*/ + items.get(i).getId().toString();
+            var cbd = "DELETE:" + items.get(i).getId().toString();
             var getInfo = "GET_INFO:" + items.get(i).getId().toString();
             inlineKeyboardButton.setCallbackData(getInfo);
             inlineKeyboardButton.getSwitchInlineQuery();
@@ -75,6 +75,15 @@ public class MessageFactory {
             keyboardButtonsRow.add(inlineKeyboardButtonMinus);
             rowList.add(keyboardButtonsRow);
         }
+        /*добавление кнопки "Оформить заказ" в корзину*/
+//        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton("Оформить заказ");
+//        var cbd = "CHECKOUT:";
+//        inlineKeyboardButton.setCallbackData(cbd);
+//        inlineKeyboardButton.getSwitchInlineQuery();
+//        List<InlineKeyboardButton> keyboardButtonsCheckout = new ArrayList<>();
+//        keyboardButtonsCheckout.add(inlineKeyboardButton);
+//        rowList.add(keyboardButtonsCheckout);
+
         inlineKeyboardMarkup.setKeyboard(rowList);
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
         sendMessageList.add(sendMessage);
@@ -86,12 +95,19 @@ public class MessageFactory {
         SendMessage sendMessage = new SendMessage(command.chatId, command.firstName + ", добрый день!");
         KeyboardButton history = new KeyboardButton("История");
         KeyboardButton menu = new KeyboardButton("Меню");
+        KeyboardButton basket = new KeyboardButton("Корзина");
+        KeyboardButton checkout = new KeyboardButton("Оформить заказ");
         List<KeyboardButton> keyboardButtons1 = new ArrayList<>();
-        keyboardButtons1.add(history);
         keyboardButtons1.add(menu);
+        keyboardButtons1.add(basket);
+        List<KeyboardButton> keyboardButtons2 = new ArrayList<>();
+        keyboardButtons2.add(checkout);
+        keyboardButtons2.add(history);
         KeyboardRow keyboardRow1 = new KeyboardRow(keyboardButtons1);
+        KeyboardRow keyboardRow2 = new KeyboardRow(keyboardButtons2);
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         keyboardRows.add(keyboardRow1);
+        keyboardRows.add(keyboardRow2);
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(keyboardRows);
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setSelective(true);

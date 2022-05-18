@@ -3,9 +3,7 @@ package ru.exampl.bot2.domain.command;
 import lombok.Data;
 
 @Data
-public class BasketCommand {
+public class CheckoutCommand {
     public String chatId;
     public String userid;
-//    public String orderId;
-
 }

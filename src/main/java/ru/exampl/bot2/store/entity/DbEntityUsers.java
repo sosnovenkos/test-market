@@ -3,7 +3,7 @@ package ru.exampl.bot2.store.entity;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.UUID;
+
 
 @Data
 @Entity
@@ -13,7 +13,7 @@ public class DbEntityUsers {
     @Id
     @GeneratedValue
     @Column(name = "id", nullable = false)
-    private UUID id;
+    private Long id;
 
     @Column(name = "user_id")
     private Integer userId;
