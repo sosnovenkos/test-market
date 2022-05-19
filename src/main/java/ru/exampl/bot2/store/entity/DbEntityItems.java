@@ -11,8 +11,8 @@ import javax.persistence.*;
 public class DbEntityItems {
 
     @Id
-    @GeneratedValue
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "product_code")

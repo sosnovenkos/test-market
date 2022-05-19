@@ -52,13 +52,18 @@ public class TelegramBotShopController {
                             .userId(Math.toIntExact(update.getMessage().getChat().getId()))
                             .build();
                     service.handleActionHistoryCommand(actionHistoryCommand);
+                    /*OrderHistoryCommand orderHistoryCommand = OrderHistoryCommand.builder()
+                            .chatId(update.getMessage().getChatId().toString())
+                            .userId(Math.toIntExact(update.getMessage().getChat().getId()))
+                            .build();
+                    service.handleOrderHistoryCommand(orderHistoryCommand);*/
                     break;
-                case MENU:
-                    MenuCommand menuCommand = new MenuCommand();
-                    menuCommand.setChatId(update.getMessage().getChatId().toString());
-                    menuCommand.setUserId(update.getMessage().getFrom().getId());
+                case PRISE:
+                    PriceCommand priceCommand = new PriceCommand();
+                    priceCommand.setChatId(update.getMessage().getChatId().toString());
+                    priceCommand.setUserId(update.getMessage().getFrom().getId());
                     try {
-                        service.handleMenuCommand(menuCommand);
+                        service.handlePriceCommand(priceCommand);
                     } catch (Exception e){
                         e.printStackTrace();
                     }
@@ -70,7 +75,7 @@ public class TelegramBotShopController {
                 case BASKET:
                     BasketCommand basketCommand = new BasketCommand();
                     basketCommand.setChatId(update.getMessage().getChatId().toString());
-                    basketCommand.setUserid(update.getMessage().getChat().getId().toString());
+                    basketCommand.setUserid(update.getMessage().getChat().getId());
 //                    basketCommand.setOrderId();
                     service.handleBasketCommand(basketCommand);
                     break;

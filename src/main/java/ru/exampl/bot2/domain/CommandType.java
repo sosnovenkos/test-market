@@ -6,9 +6,9 @@ import java.util.List;
 
 @AllArgsConstructor
 public enum CommandType {
-    START(List.of("start", "старт")),
+    START(List.of("start", "старт", "/start")),
     HISTORY(List.of("history", "история")),
-    MENU(List.of("menu", "меню")),
+    PRISE(List.of("price", "прайс")),
     BASKET(List.of("basket", "корзина")),
     CHECKOUT(List.of("checkout", "оформить заказ")),
     ADDITEM(List.of("add Item", "Добавить товар")),

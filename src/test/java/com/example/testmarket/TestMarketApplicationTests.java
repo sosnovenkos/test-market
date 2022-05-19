@@ -95,7 +95,7 @@ class TestMarketApplicationTests {
 				null,
 				null,
 				null,
-				"menu",
+				"price",
 				null,
 				null,
 				null,

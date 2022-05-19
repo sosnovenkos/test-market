@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class BasketCommand {
     public String chatId;
-    public String userid;
+    public Long userid;
 //    public String orderId;
 
 }

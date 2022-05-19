@@ -18,12 +18,10 @@ import ru.exampl.bot2.store.entity.DbEntityItems;
 import ru.exampl.bot2.store.entity.DbEntityOrder;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 //import static org.graalvm.compiler.phases.util.GraphOrder.createOrder;
 
@@ -45,8 +43,8 @@ public class BotCommandService {
         sender.send(message);
     }
 
-    public void handleMenuCommand(MenuCommand command) throws TelegramApiException {
-        log.info("handleMenu");
+    public void handlePriceCommand(PriceCommand command) throws TelegramApiException {
+        log.info("handlePrice");
         DbEntityOrder order = orderRepository.findOrderInCartStatus(command.getUserId());
         if (isNull(order)) {
             order = new DbEntityOrder();
@@ -95,13 +93,18 @@ public class BotCommandService {
         orderRepository.saveOrder(order);
         SendMessage sendMessage = new SendMessage(delItemCommand.getChatId(), "товар удалён из корзины");
         sender.send(sendMessage);
+        BasketCommand basketCommand = new BasketCommand();
+        basketCommand.setChatId(delItemCommand.getChatId());
+        basketCommand.setUserid(delItemCommand.getUserId());
+        handleBasketCommand(basketCommand);
+
     }
 
     public void handleGetInfoCommand (GetItemInfoCommand getItemInfoCommand) throws TelegramApiException {
         DbEntityItems item = itemRepository.findItem(Long.valueOf(getItemInfoCommand.getItemId()));
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(getItemInfoCommand.chatId);
-        sendMessage.setText(item.getName() + "\n" + item.getDescription() + "\n" + item.getPrice());
+        sendMessage.setText(item.getName() + " " + item.getDescription() + " " + item.getPrice() + " руб.");
         sender.send(sendMessage);
     }
 
@@ -109,7 +112,7 @@ public class BotCommandService {
         log.info("handleBasket");
         DbEntityOrder order = orderRepository.findOrderInCartStatus(Long.valueOf(basketCommand.getUserid()));
 //        log.info("order is null? - " + (order == null) + "\n"  + order.getItems());
-        if (order != null && order.getItems() != null){
+        if (order != null && order.getItems() != null && order.getItems().size() > 0){
             List<DbEntityItems> items = new ArrayList<>();
             for (Long i: order.getItems()) {
                 items.add(itemRepository.findItem(i));
@@ -135,6 +138,8 @@ public class BotCommandService {
     }
 
     public void handleActionHistoryCommand(ActionHistoryCommand command) throws TelegramApiException {
+        SendMessage sendMessage = new SendMessage(command.getChatId(), "У вас пока нет истории заказов");
+        sender.send(sendMessage);
     }
 
     public void handleOrderHistoryCommand(OrderHistoryCommand command) throws TelegramApiException {
