@@ -23,20 +23,12 @@ import ru.exampl.bot2.service.BotCommandService;
 public class TelegramBotShopController {
     private final BotCommandService service;
     private final ObjectMapper objectMapper;
-    private final Sender sender;
     @PostMapping("/1")
     public void onUpdateReceived(@RequestBody String jsonRequestBody) throws TelegramApiException, JsonProcessingException {
 
         Update update = objectMapper.readValue(jsonRequestBody, Update.class);
         log.info("Received request:\n" + objectMapper.writeValueAsString(update));
-//        service.handle(update.getMessage().getChatId().toString(), update.getMessage().getText());
-//        log.info(context.toString());
-//        log.info("Received update with message" + update.getMessage().getText());
-
         if (update.hasMessage() && update.getMessage().hasText()) {
-//            SendMessage sendMessage = new SendMessage();
-//            sendMessage.setChatId(update.getMessage().getChatId().toString());
-//            System.out.println(update.getMessage());
             switch (CommandType.findById(update.getMessage().getText().toLowerCase())) {
                 case START:
                     StartCommand startCommand = StartCommand.builder()
@@ -52,11 +44,6 @@ public class TelegramBotShopController {
                             .userId(Math.toIntExact(update.getMessage().getChat().getId()))
                             .build();
                     service.handleActionHistoryCommand(actionHistoryCommand);
-                    /*OrderHistoryCommand orderHistoryCommand = OrderHistoryCommand.builder()
-                            .chatId(update.getMessage().getChatId().toString())
-                            .userId(Math.toIntExact(update.getMessage().getChat().getId()))
-                            .build();
-                    service.handleOrderHistoryCommand(orderHistoryCommand);*/
                     break;
                 case PRISE:
                     PriceCommand priceCommand = new PriceCommand();
@@ -67,32 +54,14 @@ public class TelegramBotShopController {
                     } catch (Exception e){
                         e.printStackTrace();
                     }
-//                    System.out.println("!!!!!!!!!!!!!!");
-//                    SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),/*command.userid*/"хватит ТРАТИТЬ!!!!]");
-//                    sender.send(sendMessage);
-//                    sendMessage.setText(/*command.userid*/"хватит ТРАТИТЬ!!!!]");
                     break;
-                case BASKET:
-                    BasketCommand basketCommand = new BasketCommand();
-                    basketCommand.setChatId(update.getMessage().getChatId().toString());
-                    basketCommand.setUserid(update.getMessage().getChat().getId());
-//                    basketCommand.setOrderId();
-                    service.handleBasketCommand(basketCommand);
+                case TIMESLOT:
+                    TimeslotCommand timeslotCommand = TimeslotCommand.builder()
+                            .chatId(String.valueOf(update.getMessage().getChatId()))
+                            .userId(update.getMessage().getChat().getId())
+                            .build();
+                    service.handleTimeslotCommand(timeslotCommand);
                     break;
-                case CHECKOUT:
-                    CheckoutCommand checkoutCommand = new CheckoutCommand();
-                    checkoutCommand.setChatId(update.getMessage().getChatId().toString());
-                    checkoutCommand.setUserid(update.getMessage().getChat().getId().toString());
-                    service.handleCheckoutCommand(checkoutCommand);
-                    break;
-                case ADDITEM:
-////                    sendMessage.setChatId(update.getMessage().getChatId().toString());
-//                    sendMessage.setText(/*command.userid*/"Добавьте товар");
-//                    sender.send(sendMessage);
-
-
-
-
             }
         } else if (update.hasCallbackQuery()) {
             String [] strings = update.getCallbackQuery().getData().split(":");

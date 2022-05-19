@@ -12,6 +12,7 @@ public enum CommandType {
     BASKET(List.of("basket", "корзина")),
     CHECKOUT(List.of("checkout", "оформить заказ")),
     ADDITEM(List.of("add Item", "Добавить товар")),
+    TIMESLOT(List.of("timeslot", "записаться на приём")),
     DELETEITEM(List.of("delete Item", "Удалить товар")),
     VIEWORDERS (List.of("view orders", "Посмотреть заказы")),
     NUMBEROFVISIT (List.of("Кол-во посещений", "Number of visits")),

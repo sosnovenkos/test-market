@@ -66,6 +66,10 @@ public class BotCommandService {
         sender.sendList(message);
     }
 
+    public void handleTimeslotCommand(TimeslotCommand timeslotCommand){
+        log.info("handleTimeslot");
+    }
+
     public void handleAddItem (AddItemCommand addItemCommand) throws TelegramApiException {
 
 //        DbEntityOrder order = orderRepository.findOrder(addItemCommand.getOrderId());
