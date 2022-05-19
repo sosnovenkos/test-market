@@ -14,10 +14,15 @@ import ru.exampl.bot2.sender.Sender;
 import ru.exampl.bot2.store.ActionRepositoryImpl;
 import ru.exampl.bot2.store.ItemRepositoryImpl;
 import ru.exampl.bot2.store.OrderRepositoryImpl;
+import ru.exampl.bot2.store.TimeslotRepositoryImpl;
 import ru.exampl.bot2.store.entity.DbEntityItems;
 import ru.exampl.bot2.store.entity.DbEntityOrder;
+import ru.exampl.bot2.store.entity.DbEntityTimeslot;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -34,6 +39,7 @@ public class BotCommandService {
     private final ItemRepositoryImpl itemRepository;
     private final MessageFactory messageFactory;
     private final ActionRepositoryImpl actionRepositoryImpl;
+    private final TimeslotRepositoryImpl timeslotRepository;
 
 
     public void handleStartCommand(StartCommand command) throws TelegramApiException, JsonProcessingException {
@@ -45,29 +51,47 @@ public class BotCommandService {
 
     public void handlePriceCommand(PriceCommand command) throws TelegramApiException {
         log.info("handlePrice");
-        DbEntityOrder order = orderRepository.findOrderInCartStatus(command.getUserId());
-        if (isNull(order)) {
-            order = new DbEntityOrder();
-            order.setStatus("cart");
-            order.setUserId(command.getUserId());
+        var x = OffsetDateTime.now().plusDays(1).getDayOfWeek().toString();
+        var y = OffsetDateTime.now().plusDays(1).getDayOfMonth();
+        log.info(x + y);
+        /*интернет магазин*/
+//        DbEntityOrder order = orderRepository.findOrderInCartStatus(command.getUserId());
+//        if (isNull(order)) {
+//            order = new DbEntityOrder();
+//            order.setStatus("cart");
+//            order.setUserId(command.getUserId());
+////            order.setId(Long.valueOf(command.getChatId()));
+//            try {
+//                orderRepository.saveOrder(order);
+//            } catch (Exception e){
+//                e.printStackTrace();
+//            }
+//        }
+        /*онлайн запись*/
+            DbEntityTimeslot timeslot = new DbEntityTimeslot();
+            timeslot.setUserId(command.getUserId());
 //            order.setId(Long.valueOf(command.getChatId()));
             try {
-                orderRepository.saveOrder(order);
+                timeslotRepository.saveTimeslot(timeslot);
             } catch (Exception e){
                 e.printStackTrace();
             }
-        }
-//        DbEntityOrder order = orderRepository.findOrder(Long.fromString("e289f6c1-fa21-4f97-aac2-ec564c5dae49"));
-//        if (order == null) order = (DbEntityOrder) createOrder();
-//        if (order == null) order = DbEntityOrder.id.toString("e289f6c1-fa21-4f97-aac2-ec564c5dae49");
-        var items = itemRepository.findAllItems();
-//        command.setOrderId(order.getId().toString());
-        var message = messageFactory.createMessageForItemsList(command, order, items);
-        sender.sendList(message);
+
+////        DbEntityOrder order = orderRepository.findOrder(Long.fromString("e289f6c1-fa21-4f97-aac2-ec564c5dae49"));
+////        if (order == null) order = (DbEntityOrder) createOrder();
+////        if (order == null) order = DbEntityOrder.id.toString("e289f6c1-fa21-4f97-aac2-ec564c5dae49");
+//        var items = itemRepository.findAllItems();
+////        command.setOrderId(order.getId().toString());
+//        var message = messageFactory.createMessageForItemsList(command, order, items);
+//        sender.sendList(message);
     }
 
     public void handleTimeslotCommand(TimeslotCommand timeslotCommand){
         log.info("handleTimeslot");
+        DbEntityTimeslot timeslot = new DbEntityTimeslot();
+        timeslot.setUserId(timeslotCommand.getUserId());
+        Date date = new Date();
+        timeslot.setDate(Date.from(Instant.ofEpochSecond(date.getTime())));
     }
 
     public void handleAddItem (AddItemCommand addItemCommand) throws TelegramApiException {

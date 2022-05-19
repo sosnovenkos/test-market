@@ -2,6 +2,7 @@ package ru.exampl.bot2.store.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Data;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
@@ -37,4 +38,8 @@ public class DbEntityTimeslot implements Serializable {
 
     @Column(name = "time")
     private Time time;
+
+    @Column(name = "data")
+    @Type(type = "jsonb")
+    private String data;
 }
