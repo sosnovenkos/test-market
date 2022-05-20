@@ -2,7 +2,7 @@
 --changeset ssosnovenko:v_001 dbms:postgresql
 --preconditions onFail:HALT onError:HALT
 
-delete from test_market.items
+delete from test_market.items;
 insert into test_market.items (product_code, name, description, price, "count") values
                                                                                     ('1', 'Миндаль', '500 гр.', 500.00, 5),
                                                                                     ('1', 'Грецкий орех', '500 гр.', 400.00, 10),
