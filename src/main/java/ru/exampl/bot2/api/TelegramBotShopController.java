@@ -26,104 +26,84 @@ public class TelegramBotShopController {
     private final Sender sender;
     @PostMapping("/1")
     public void onUpdateReceived(@RequestBody String jsonRequestBody) throws TelegramApiException, JsonProcessingException {
+        try {
+            Update update = objectMapper.readValue(jsonRequestBody, Update.class);
+            log.info("Received request:\n" + objectMapper.writeValueAsString(update));
 
-        Update update = objectMapper.readValue(jsonRequestBody, Update.class);
-        log.info("Received request:\n" + objectMapper.writeValueAsString(update));
-//        service.handle(update.getMessage().getChatId().toString(), update.getMessage().getText());
-//        log.info(context.toString());
-//        log.info("Received update with message" + update.getMessage().getText());
+            if (update.hasMessage() && update.getMessage().hasText()) {
 
-        if (update.hasMessage() && update.getMessage().hasText()) {
-//            SendMessage sendMessage = new SendMessage();
-//            sendMessage.setChatId(update.getMessage().getChatId().toString());
-//            System.out.println(update.getMessage());
-            switch (CommandType.findById(update.getMessage().getText().toLowerCase())) {
-                case START:
-                    StartCommand startCommand = StartCommand.builder()
-                            .userId(update.getMessage().getChat().getId())
-                            .chatId(update.getMessage().getChatId().toString())
-                            .firstName(update.getMessage().getChat().getFirstName())
-                            .build();
-                    service.handleStartCommand(startCommand);
-                    break;
-                case HISTORY:
-                    ActionHistoryCommand actionHistoryCommand = ActionHistoryCommand.builder()
-                            .chatId(update.getMessage().getChatId().toString())
-                            .userId(Math.toIntExact(update.getMessage().getChat().getId()))
-                            .build();
-                    service.handleActionHistoryCommand(actionHistoryCommand);
-                    /*OrderHistoryCommand orderHistoryCommand = OrderHistoryCommand.builder()
-                            .chatId(update.getMessage().getChatId().toString())
-                            .userId(Math.toIntExact(update.getMessage().getChat().getId()))
-                            .build();
-                    service.handleOrderHistoryCommand(orderHistoryCommand);*/
-                    break;
-                case PRISE:
-                    PriceCommand priceCommand = new PriceCommand();
-                    priceCommand.setChatId(update.getMessage().getChatId().toString());
-                    priceCommand.setUserId(update.getMessage().getFrom().getId());
-                    try {
-                        service.handlePriceCommand(priceCommand);
-                    } catch (Exception e){
-                        e.printStackTrace();
+                switch (CommandType.findById(update.getMessage().getText().toLowerCase())) {
+                    case START:
+                        StartCommand startCommand = StartCommand.builder()
+                                .userId(update.getMessage().getChat().getId())
+                                .chatId(update.getMessage().getChatId().toString())
+                                .firstName(update.getMessage().getChat().getFirstName())
+                                .build();
+                        service.handleStartCommand(startCommand);
+                        break;
+                    case HISTORY:
+                        ActionHistoryCommand actionHistoryCommand = ActionHistoryCommand.builder()
+                                .chatId(update.getMessage().getChatId().toString())
+                                .userId(Math.toIntExact(update.getMessage().getChat().getId()))
+                                .build();
+                        service.handleActionHistoryCommand(actionHistoryCommand);
+
+                        break;
+                    case PRISE:
+                        PriceCommand priceCommand = new PriceCommand();
+                        priceCommand.setChatId(update.getMessage().getChatId().toString());
+                        priceCommand.setUserId(update.getMessage().getFrom().getId());
+                        try {
+                            service.handlePriceCommand(priceCommand);
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+                        break;
+                    case BASKET:
+                        BasketCommand basketCommand = new BasketCommand();
+                        basketCommand.setChatId(update.getMessage().getChatId().toString());
+                        basketCommand.setUserid(update.getMessage().getChat().getId());
+                        service.handleBasketCommand(basketCommand);
+                        break;
+                    case CHECKOUT:
+                        CheckoutCommand checkoutCommand = new CheckoutCommand();
+                        checkoutCommand.setChatId(update.getMessage().getChatId().toString());
+                        checkoutCommand.setUserid(update.getMessage().getChat().getId().toString());
+                        service.handleCheckoutCommand(checkoutCommand);
+                        break;
+                    case ADDITEM:
+////
+                }
+            } else if (update.hasCallbackQuery()) {
+                String [] strings = update.getCallbackQuery().getData().split(":");
+                if (strings[0].equalsIgnoreCase("GET_INFO")){
+                    GetItemInfoCommand getItemInfoCommand = new GetItemInfoCommand();
+                    getItemInfoCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
+                    getItemInfoCommand.setItemId(strings[1]);
+                    service.handleGetInfoCommand(getItemInfoCommand);
+
+                } else if (strings[0].equalsIgnoreCase("ADD_TO_CART")) {
+                    AddItemCommand addItemCommand = new AddItemCommand();
+                    addItemCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
+                    if (update.getCallbackQuery().getFrom().getId() != null) {
+                        addItemCommand.setUserId(Long.valueOf(update.getCallbackQuery().getFrom().getId()));
+                    } else {
+                        addItemCommand.setUserId(Long.valueOf(update.getCallbackQuery().getMessage().getChat().getId()));
                     }
-//                    System.out.println("!!!!!!!!!!!!!!");
-//                    SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(),/*command.userid*/"хватит ТРАТИТЬ!!!!]");
-//                    sender.send(sendMessage);
-//                    sendMessage.setText(/*command.userid*/"хватит ТРАТИТЬ!!!!]");
-                    break;
-                case BASKET:
-                    BasketCommand basketCommand = new BasketCommand();
-                    basketCommand.setChatId(update.getMessage().getChatId().toString());
-                    basketCommand.setUserid(update.getMessage().getChat().getId());
-//                    basketCommand.setOrderId();
-                    service.handleBasketCommand(basketCommand);
-                    break;
-                case CHECKOUT:
-                    CheckoutCommand checkoutCommand = new CheckoutCommand();
-                    checkoutCommand.setChatId(update.getMessage().getChatId().toString());
-                    checkoutCommand.setUserid(update.getMessage().getChat().getId().toString());
-                    service.handleCheckoutCommand(checkoutCommand);
-                    break;
-                case ADDITEM:
-////                    sendMessage.setChatId(update.getMessage().getChatId().toString());
-//                    sendMessage.setText(/*command.userid*/"Добавьте товар");
-//                    sender.send(sendMessage);
-
-
-
-
-            }
-        } else if (update.hasCallbackQuery()) {
-            String [] strings = update.getCallbackQuery().getData().split(":");
-            if (strings[0].equalsIgnoreCase("GET_INFO")){
-                GetItemInfoCommand getItemInfoCommand = new GetItemInfoCommand();
-                getItemInfoCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
-                getItemInfoCommand.setItemId(strings[1]);
-                service.handleGetInfoCommand(getItemInfoCommand);
-
-            } else if (strings[0].equalsIgnoreCase("ADD_TO_CART")) {
-                AddItemCommand addItemCommand = new AddItemCommand();
-                addItemCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
-                if (update.getCallbackQuery().getFrom().getId() != null) {
-                    addItemCommand.setUserId(Long.valueOf(update.getCallbackQuery().getFrom().getId()));
-                } else {
-                    addItemCommand.setUserId(Long.valueOf(update.getCallbackQuery().getMessage().getChat().getId()));
-                }
 //                addItemCommand.setOrderId();
-                addItemCommand.setItemId(Long.valueOf(strings[2]));
-                service.handleAddItem(addItemCommand);
-            } else if (strings[0].equalsIgnoreCase("DELETE")) {
-                DelItemCommand delItemCommand = new DelItemCommand();
-                delItemCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
-                if (update.getCallbackQuery().getFrom().getId() != null) {
-                    delItemCommand.setUserId(Long.valueOf(update.getCallbackQuery().getFrom().getId()));
-                } else {
-                    delItemCommand.setUserId(Long.valueOf(update.getCallbackQuery().getMessage().getChat().getId()));
+                    addItemCommand.setItemId(Long.valueOf(strings[2]));
+                    service.handleAddItem(addItemCommand);
+                } else if (strings[0].equalsIgnoreCase("DELETE")) {
+                    DelItemCommand delItemCommand = new DelItemCommand();
+                    delItemCommand.setChatId(update.getCallbackQuery().getMessage().getChatId().toString());
+                    if (update.getCallbackQuery().getFrom().getId() != null) {
+                        delItemCommand.setUserId(Long.valueOf(update.getCallbackQuery().getFrom().getId()));
+                    } else {
+                        delItemCommand.setUserId(Long.valueOf(update.getCallbackQuery().getMessage().getChat().getId()));
+                    }
+                    delItemCommand.setItemId(Long.valueOf(strings[1]));
+                    service.handleDelItem(delItemCommand);
                 }
-                delItemCommand.setItemId(Long.valueOf(strings[1]));
-                service.handleDelItem(delItemCommand);
-            }
 //            String cbd = update.getCallbackQuery().getData();
 //            String[] strings = cbd.split(":");
 //            String orderId = strings[1];
@@ -137,7 +117,12 @@ public class TelegramBotShopController {
 //            addItemToCartCommand.setUserId(userId);
 //            service.handleAddItemToCartCommand(addItemToCartCommand);
 
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+
     }
 }
 

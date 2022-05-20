@@ -27,7 +27,7 @@ public class MessageFactory {
     public List<SendMessage> createMessageForItemsList(PriceCommand command, DbEntityOrder order, List<DbEntityItems> items){
         log.info("createMessageForItemsList");
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setText("Нажимайте на \"+\" для добавления в корзину");
+        sendMessage.setText("Нажимайте на кнопки и добавляйте позиции в корзину");
         sendMessage.setChatId(command.chatId);
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -36,17 +36,17 @@ public class MessageFactory {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
                     items.get(i).getName() + " " + items.get(i).getDescription() + " " + items.get(i).getPrice() + " руб.");
             var cbd = "ADD_TO_CART:" + order.getId() + ":" + items.get(i).getId().toString();
-            var getInfo = "GET_INFO:" + items.get(i).getId().toString();
-            inlineKeyboardButton.setCallbackData(getInfo);
+//            var getInfo = "GET_INFO:" + items.get(i).getId().toString();
+            inlineKeyboardButton.setCallbackData(cbd);
             inlineKeyboardButton.getSwitchInlineQuery();
-            InlineKeyboardButton inlineKeyboardButtonPlus = new InlineKeyboardButton("В корзину");
-            inlineKeyboardButtonPlus.setCallbackData(cbd);
+//            InlineKeyboardButton inlineKeyboardButtonPlus = new InlineKeyboardButton("В корзину");
+//            inlineKeyboardButtonPlus.setCallbackData(cbd);
             List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-            List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
+//            List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
             keyboardButtonsRow1.add(inlineKeyboardButton);
-            keyboardButtonsRow2.add(inlineKeyboardButtonPlus);
+//            keyboardButtonsRow2.add(inlineKeyboardButtonPlus);
             rowList.add(keyboardButtonsRow1);
-            rowList.add(keyboardButtonsRow2);
+//            rowList.add(keyboardButtonsRow2);
         }
         inlineKeyboardMarkup.setKeyboard(rowList);
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
@@ -58,7 +58,7 @@ public class MessageFactory {
     public List<SendMessage> createMessageForBasket (BasketCommand basketCommand, List<DbEntityItems> items){
         log.info("createMessageForBasket");
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setText("Проверьте заказ");
+        sendMessage.setText("Нажимайте на кнопки и удляйте позиции из корзины");
         sendMessage.setChatId(basketCommand.getChatId());
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -67,26 +67,14 @@ public class MessageFactory {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
                     items.get(i).getName() + " " + items.get(i).getDescription() + " " + items.get(i).getPrice() + " руб.");
             var cbd = "DELETE:" + items.get(i).getId().toString();
-            var getInfo = "GET_INFO:" + items.get(i).getId().toString();
-            inlineKeyboardButton.setCallbackData(getInfo);
+            inlineKeyboardButton.setCallbackData(cbd);
             inlineKeyboardButton.getSwitchInlineQuery();
-            InlineKeyboardButton inlineKeyboardButtonMinus = new InlineKeyboardButton("Убрать");
-            inlineKeyboardButtonMinus.setCallbackData(cbd);
             List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
             List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
             keyboardButtonsRow1.add(inlineKeyboardButton);
-            keyboardButtonsRow2.add(inlineKeyboardButtonMinus);
             rowList.add(keyboardButtonsRow1);
             rowList.add(keyboardButtonsRow2);
         }
-        /*добавление кнопки "Оформить заказ" в корзину*/
-//        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton("Оформить заказ");
-//        var cbd = "CHECKOUT:";
-//        inlineKeyboardButton.setCallbackData(cbd);
-//        inlineKeyboardButton.getSwitchInlineQuery();
-//        List<InlineKeyboardButton> keyboardButtonsCheckout = new ArrayList<>();
-//        keyboardButtonsCheckout.add(inlineKeyboardButton);
-//        rowList.add(keyboardButtonsCheckout);
 
         inlineKeyboardMarkup.setKeyboard(rowList);
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
