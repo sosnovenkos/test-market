@@ -62,9 +62,6 @@ public class BotCommandService {
                 e.printStackTrace();
             }
         }
-//        DbEntityOrder order = orderRepository.findOrder(Long.fromString("e289f6c1-fa21-4f97-aac2-ec564c5dae49"));
-//        if (order == null) order = (DbEntityOrder) createOrder();
-//        if (order == null) order = DbEntityOrder.id.toString("e289f6c1-fa21-4f97-aac2-ec564c5dae49");
         var items = itemRepository.findAllItems();
 //        command.setOrderId(order.getId().toString());
         var message = messageFactory.createMessageForItemsList(command, order, items);
