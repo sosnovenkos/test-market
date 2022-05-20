@@ -39,7 +39,7 @@ public class MessageFactory {
             var getInfo = "GET_INFO:" + items.get(i).getId().toString();
             inlineKeyboardButton.setCallbackData(getInfo);
             inlineKeyboardButton.getSwitchInlineQuery();
-            InlineKeyboardButton inlineKeyboardButtonPlus = new InlineKeyboardButton("+");
+            InlineKeyboardButton inlineKeyboardButtonPlus = new InlineKeyboardButton("В корзину");
             inlineKeyboardButtonPlus.setCallbackData(cbd);
             List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
             List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
@@ -70,7 +70,7 @@ public class MessageFactory {
             var getInfo = "GET_INFO:" + items.get(i).getId().toString();
             inlineKeyboardButton.setCallbackData(getInfo);
             inlineKeyboardButton.getSwitchInlineQuery();
-            InlineKeyboardButton inlineKeyboardButtonMinus = new InlineKeyboardButton("-");
+            InlineKeyboardButton inlineKeyboardButtonMinus = new InlineKeyboardButton("Убрать");
             inlineKeyboardButtonMinus.setCallbackData(cbd);
             List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
             List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
