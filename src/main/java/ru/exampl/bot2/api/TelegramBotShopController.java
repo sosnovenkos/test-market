@@ -38,6 +38,7 @@ public class TelegramBotShopController {
                                 .userId(update.getMessage().getChat().getId())
                                 .chatId(update.getMessage().getChatId().toString())
                                 .firstName(update.getMessage().getChat().getFirstName())
+                                .username(update.getMessage().getFrom().getUserName())
                                 .build();
                         service.handleStartCommand(startCommand);
                         break;
@@ -69,6 +70,7 @@ public class TelegramBotShopController {
                         CheckoutCommand checkoutCommand = new CheckoutCommand();
                         checkoutCommand.setChatId(update.getMessage().getChatId().toString());
                         checkoutCommand.setUserid(update.getMessage().getChat().getId().toString());
+                        checkoutCommand.setUsername(update.getMessage().getFrom().getUserName());
                         service.handleCheckoutCommand(checkoutCommand);
                         break;
                     case ADDITEM:

@@ -3,6 +3,7 @@ package ru.exampl.bot2.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -35,12 +36,16 @@ public class BotCommandService {
     private final MessageFactory messageFactory;
     private final ActionRepositoryImpl actionRepositoryImpl;
 
+    @Value("${bot.admin.chat-ids}")
+    private List<String> adminChatIds;
 
     public void handleStartCommand(StartCommand command) throws TelegramApiException, JsonProcessingException {
 
         var message = messageFactory.createUser(command);
         actionRepositoryImpl.save(command);
-        sender.send(message);
+        var messages = new ArrayList<>(List.of(message));
+        adminChatIds.forEach(id -> messages.add(new SendMessage(id, "Кто-то что-то написал @" + command.username)));
+        sender.sendList(messages);
     }
 
     public void handlePriceCommand(PriceCommand command) throws TelegramApiException {
@@ -132,9 +137,10 @@ public class BotCommandService {
         if (order != null && order.getItems() != null){
             order.setStatus("delivery");
             orderRepository.saveOrder(order);
-            SendMessage sendMessage = new SendMessage(checkoutCommand.getChatId(), "Заказ оформлен");
-            SendMessage sendMessage2 = new SendMessage("387340096", "Заказ оформлен");
-            sender.sendList(List.of(sendMessage, sendMessage2));
+            SendMessage message = new SendMessage(checkoutCommand.getChatId(), "Заказ оформлен");
+            var messages = new ArrayList<>(List.of(message));
+            adminChatIds.forEach(id -> messages.add(new SendMessage(id, "Оформил заказ @" + checkoutCommand.username)));
+            sender.sendList(messages);
         }
     }
 

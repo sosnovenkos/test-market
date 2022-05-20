@@ -9,6 +9,7 @@ import lombok.Data;
 public class StartCommand {
     public String chatId;
     public String firstName;
+    public String username;
 
     public Long userId;
 }
