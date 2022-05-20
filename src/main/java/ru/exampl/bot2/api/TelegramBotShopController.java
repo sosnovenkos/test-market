@@ -119,7 +119,8 @@ public class TelegramBotShopController {
 
             }
         } catch (Exception e) {
-            e.printStackTrace();
+
+
         }
 
 

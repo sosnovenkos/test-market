@@ -134,7 +134,7 @@ public class BotCommandService {
             orderRepository.saveOrder(order);
             SendMessage sendMessage = new SendMessage(checkoutCommand.getChatId(), "Заказ оформлен");
             SendMessage sendMessage2 = new SendMessage("387340096", "Заказ оформлен");
-            sender.send(sendMessage);
+            sender.sendList(List.of(sendMessage, sendMessage2));
         }
     }
 
