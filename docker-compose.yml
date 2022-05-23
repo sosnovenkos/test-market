@@ -3,7 +3,7 @@ version: '3'
 services:
   postgresql:
     image: postgres:12-alpine
-    container_name: client-man
+    container_name: one1
     ports:
       - 5440:5432
     environment:

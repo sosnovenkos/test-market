@@ -16,6 +16,7 @@ import ru.exampl.bot2.domain.command.StartCommand;
 import ru.exampl.bot2.store.entity.DbEntityItems;
 import ru.exampl.bot2.store.entity.DbEntityOrder;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,42 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class MessageFactory {
+
+    public List<SendMessage> createMessageForTimeslotDate(PriceCommand command, OffsetDateTime dateTime){
+        log.info("createMessageForTimeslotDate");
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(command.chatId);
+        sendMessage.setText("Выберите желаемую дату");
+        List<SendMessage> sendMessageList = new ArrayList<>();
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
+                    dateTime.plusDays(i+1).getDayOfWeek().toString()
+                            + " " + dateTime.plusDays(i+1).getDayOfMonth()
+                            + " " + dateTime.plusDays(i+1).getMonth()
+                            + " " + dateTime.plusDays(i+1).getYear()
+            );
+            var cbd = "ADD_TO_CART:" + dateTime.plusDays(i+1);
+            inlineKeyboardButton.setCallbackData(cbd);
+            inlineKeyboardButton.getSwitchInlineQuery();
+//            InlineKeyboardButton inlineKeyboardButtonPlus = new InlineKeyboardButton("В корзину");
+//            inlineKeyboardButtonPlus.setCallbackData(cbd);
+            List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+//            List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
+            keyboardButtonsRow1.add(inlineKeyboardButton);
+//            keyboardButtonsRow2.add(inlineKeyboardButtonPlus);
+            rowList.add(keyboardButtonsRow1);
+//            rowList.add(keyboardButtonsRow2);
+        }
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        sendMessageList.add(sendMessage);
+        log.info("sendMessageList size" + sendMessageList.size());
+        return sendMessageList;
+
+
+    }
 
     public List<SendMessage> createMessageForItemsList(PriceCommand command, DbEntityOrder order, List<DbEntityItems> items){
         log.info("createMessageForItemsList");

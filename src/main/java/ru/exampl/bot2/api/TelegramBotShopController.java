@@ -60,6 +60,9 @@ public class TelegramBotShopController {
                             e.printStackTrace();
                         }
                         break;
+                    case TIMESLOT:
+
+                        break;
                     case BASKET:
                         BasketCommand basketCommand = new BasketCommand();
                         basketCommand.setChatId(update.getMessage().getChatId().toString());

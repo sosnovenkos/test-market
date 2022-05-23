@@ -11,6 +11,7 @@ public enum CommandType {
     PRISE(List.of("price", "прайс")),
     BASKET(List.of("basket", "корзина")),
     CHECKOUT(List.of("checkout", "оформить заказ")),
+    TIMESLOT(List.of("timeslot", "записаться на приём")),
     ADDITEM(List.of("add Item", "Добавить товар")),
     DELETEITEM(List.of("delete Item", "Удалить товар")),
     VIEWORDERS (List.of("view orders", "Посмотреть заказы")),
