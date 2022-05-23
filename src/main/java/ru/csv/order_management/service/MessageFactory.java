@@ -9,21 +9,22 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.csv.order_management.domain.command.FindChildCommand;
-import ru.csv.order_management.store.entity.DbEntityOrder;
-import ru.csv.order_management.domain.command.BasketCommand;
-import ru.csv.order_management.domain.command.PriceCommand;
-import ru.csv.order_management.domain.command.StartCommand;
+import ru.csv.order_management.domain.command.*;
+import ru.csv.order_management.store.entity.DbEntityAddress;
 import ru.csv.order_management.store.entity.DbEntityItems;
+import ru.csv.order_management.store.entity.DbEntityOrder;
+import ru.csv.order_management.store.entity.DbEntityUser;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class MessageFactory {
+    private final List<String> PRODUCT_CODE_AS_BACK = List.of("14", "15", "16");
 
     public List<SendMessage> createMessageForGroupList(PriceCommand command, List<DbEntityItems> items) {
         log.info("Create Messages For Groups: ." + command.getClass().getSimpleName() + " - " + command.getId());
@@ -34,8 +35,8 @@ public class MessageFactory {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         items.forEach(item -> {
-            var inlineKeyboardButton = new InlineKeyboardButton(item.getName() + " " + item.getDescription() + " " + item.getPrice() + " руб.");
-            var callbackData = "FIND_CHILD:" + ":" + item.getId();
+            var inlineKeyboardButton = new InlineKeyboardButton(item.getName());
+            var callbackData = "FIND_CHILD:" + item.getProductCode();
             inlineKeyboardButton.setCallbackData(callbackData);
             inlineKeyboardButton.getSwitchInlineQuery();
             List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
@@ -58,15 +59,22 @@ public class MessageFactory {
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-       items.forEach(item -> {
-                   var inlineKeyboardButton = new InlineKeyboardButton(item.getName() + " " + item.getDescription() + " " + item.getPrice() + " руб.");
-                   var cbd = "ADD_TO_CART:" + order.getId() + ":" + item.getId();
-                   inlineKeyboardButton.setCallbackData(cbd);
-                   inlineKeyboardButton.getSwitchInlineQuery();
-                   List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-                   keyboardButtonsRow1.add(inlineKeyboardButton);
-                   rowList.add(keyboardButtonsRow1);
-               }
+        items.forEach(item -> {
+            InlineKeyboardButton inlineKeyboardButton;
+            String callbackData;
+            if (PRODUCT_CODE_AS_BACK.contains(item.getProductCode())) {
+                inlineKeyboardButton = new InlineKeyboardButton(item.getName());
+                callbackData = "price:";
+            } else {
+                inlineKeyboardButton = new InlineKeyboardButton(item.getName() + " " + item.getDescription() + " гр. " + item.getPrice() + " руб.");
+                callbackData = "ADD_TO_CART:" + order.getId() + ":" + item.getId();
+            }
+            inlineKeyboardButton.setCallbackData(callbackData);
+            inlineKeyboardButton.getSwitchInlineQuery();
+            List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
+            keyboardButtonsRow.add(inlineKeyboardButton);
+            rowList.add(keyboardButtonsRow);
+                }
         );
         inlineKeyboardMarkup.setKeyboard(rowList);
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
@@ -75,11 +83,11 @@ public class MessageFactory {
         return sendMessageList;
     }
 
-    public List<SendMessage> createMessageForBasket (BasketCommand basketCommand, List<DbEntityItems> items){
-        log.info("createMessageForBasket");
+    public List<SendMessage> createMessageForBasket (BasketCommand command, List<DbEntityItems> items){
+        log.info("Create message for Basket: " + command.getUserId());
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText("Нажимайте на кнопки и удляйте позиции из корзины");
-        sendMessage.setChatId(basketCommand.getChatId());
+        sendMessage.setChatId(command.getChatId());
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
@@ -89,21 +97,27 @@ public class MessageFactory {
             var cbd = "DEL_ITEM:" + items.get(i).getId().toString();
             inlineKeyboardButton.setCallbackData(cbd);
             inlineKeyboardButton.getSwitchInlineQuery();
-            List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-            List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
-            keyboardButtonsRow1.add(inlineKeyboardButton);
-            rowList.add(keyboardButtonsRow1);
-            rowList.add(keyboardButtonsRow2);
+            List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
+            keyboardButtonsRow.add(inlineKeyboardButton);
+            rowList.add(keyboardButtonsRow);
         }
 
         inlineKeyboardMarkup.setKeyboard(rowList);
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
         sendMessageList.add(sendMessage);
         log.info("Created Messages: .DEL_ITEM command: " + sendMessageList.size());
+
+        SendMessage sendInfoMessage = new SendMessage();
+        var sum = items.stream().filter(item -> nonNull(item.getPrice())).mapToLong(DbEntityItems::getPrice).sum();
+        var weight = items.stream().filter(item -> nonNull(item.getPrice())).mapToLong(item -> Long.parseLong(item.getDescription())).sum();
+        sendInfoMessage.setText("Сумма заказа: " + sum + " руб. Вес заказа: " + weight / 1000.0 + " кг.");
+        sendInfoMessage.setChatId(command.chatId);
+        sendMessageList.add(sendInfoMessage);
+
         return sendMessageList;
     }
 
-    public SendMessage createReplyToStartCommand(StartCommand command) throws TelegramApiException {
+    public SendMessage createReplyToStartCommand(StartCommand command) {
         SendMessage sendMessage = new SendMessage(command.chatId, command.firstName + ", добрый день!");
         KeyboardButton history = new KeyboardButton("История");
         KeyboardButton price = new KeyboardButton("Прайс");
@@ -126,5 +140,40 @@ public class MessageFactory {
         sendMessage.enableMarkdown(true);
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
        return sendMessage;
+    }
+
+    public List<SendMessage> createMessageForOrdering(CheckoutCommand command, List<DbEntityAddress> addresses, DbEntityOrder order) {
+        log.info("Create message for Ordering: " + command.getUserId());
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setText("Выберите ваши адреса доставки или создайте новый: ");
+        sendMessage.setChatId(command.getChatId());
+
+        List<SendMessage> sendMessageList = new ArrayList<>();
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        addresses.forEach( address -> {
+            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(address.getPhone() + " : " + address.getDescription());
+            var cbd = "SET_ADDR:" + order.getId() + ":" + address.getId();
+            inlineKeyboardButton.setCallbackData(cbd);
+            inlineKeyboardButton.getSwitchInlineQuery();
+            List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
+            keyboardButtonsRow.add(inlineKeyboardButton);
+            rowList.add(keyboardButtonsRow);
+        }
+        );
+
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(".Новый адрес");
+        var cbd = "ADD_ADDR:";
+        inlineKeyboardButton.setCallbackData(cbd);
+        inlineKeyboardButton.getSwitchInlineQuery();
+        List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
+        keyboardButtonsRow.add(inlineKeyboardButton);
+        rowList.add(keyboardButtonsRow);
+
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        sendMessageList.add(sendMessage);
+        log.info("Created Messages: .SET_ADDR command: " + sendMessageList.size());
+        return sendMessageList;
     }
 }

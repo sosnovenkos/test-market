@@ -13,27 +13,22 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "orders")
-@TypeDefs({
-        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
-})
-
-public class DbEntityOrder {
+@Table(name = "user")
+@TypeDefs({ @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
+public class DbEntityUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "user_id")
+    @Column(name = "telegram_user_id")
     private Long userId;
 
-    @Column(name = "items")
+    @Column(name = "addresses")
     @Type(type = "jsonb")
-    private List<Long> items;
+    private List<Long> addresses;
 
-    @Column(name = "status")
-    private String status;
-
-    @Column(name = "created_at")
-    private OffsetDateTime createdAt;
+    @Column(name = "orders")
+    @Type(type = "jsonb")
+    private List<Long> orders;
 }

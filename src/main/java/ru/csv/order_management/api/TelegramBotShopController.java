@@ -23,14 +23,7 @@ public class TelegramBotShopController {
     public void onUpdateReceived(@RequestBody  Update update) {
         try {
             log.info("Received request:\n" + objectMapper.writeValueAsString(update));
-
-            CommandType commandType = null;
-            if (update.hasMessage() && update.getMessage().hasText()) {
-                commandType = CommandType.from(update.getMessage().getText().toLowerCase());
-            } else if (update.hasCallbackQuery() && update.getCallbackQuery().getData() != null) {
-                commandType = CommandType.from(update.getCallbackQuery().getData().split(":")[0]);
-            }
-            var command = CommandFactory.create(commandType, update);
+            var command = CommandFactory.create(update);
             log.info("Handle: " + command.getClass().getSimpleName() + " with id " + command.getId());
             service.handle(command);
             log.info("Success: " + command.getClass().getSimpleName() + " with id " + command.getId());

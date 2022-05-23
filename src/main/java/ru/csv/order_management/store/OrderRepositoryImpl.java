@@ -1,5 +1,6 @@
 package ru.csv.order_management.store;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import ru.csv.order_management.domain.Order;
@@ -8,23 +9,14 @@ import ru.csv.order_management.store.entity.DbEntityOrder;
 import java.util.*;
 
 @Repository
+@AllArgsConstructor
 public class OrderRepositoryImpl {
-    @Autowired
-    private OrderJpaRepository orderJpaRepository;
-    public Order o1 = Order.builder().items(List.of()).date(new GregorianCalendar().getTime().toString()).sum("2569").build();
-    public Order o2 = Order.builder().items(List.of()).date(new GregorianCalendar().getTime().toString()).sum("1236").build();
-    public Order o3 = Order.builder().items(List.of()).date("22.08.2019").sum("1566").build();
+        private final OrderJpaRepository orderJpaRepository;
 
-    public List<Order> findByUserId(String userid) {
-        return List.of(o1, o2, o3);
-    }
 
-//    public DbEntityOrder findOrderInCartStatus() {
-////            return orderJpaRepository.findByStatus("CART");
-//        }
 
-    public DbEntityOrder findOrder(Long id) {
-        return orderJpaRepository.findById(id).get();
+    public List<DbEntityOrder> findByUserId(Long userid) {
+        return orderJpaRepository.findByUserId(userid);
     }
 
 

@@ -1,20 +1,18 @@
 package ru.csv.order_management.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.csv.order_management.domain.Order;
 import ru.csv.order_management.domain.command.*;
 import ru.csv.order_management.sender.Sender;
 import ru.csv.order_management.store.ActionRepositoryImpl;
 import ru.csv.order_management.store.ItemRepositoryImpl;
 import ru.csv.order_management.store.OrderRepositoryImpl;
+import ru.csv.order_management.store.AddressRepositoryImpl;
 import ru.csv.order_management.store.entity.DbEntityItems;
 import ru.csv.order_management.store.entity.DbEntityOrder;
 
@@ -32,13 +30,14 @@ public class OrderCommandService {
     private final Sender sender;
     private final OrderRepositoryImpl orderRepository;
     private final ItemRepositoryImpl itemRepository;
+    private final AddressRepositoryImpl addressRepository;
     private final MessageFactory messageFactory;
     private final ActionRepositoryImpl actionRepositoryImpl;
 
     @Value("${bot.admin.chat-ids}")
     private List<String> adminChatIds;
 
-    public void handle(Command command) throws TelegramApiException, JsonProcessingException {
+    public void handle(Command command) throws TelegramApiException {
         if (command instanceof StartCommand) handleStartCommand((StartCommand)command);
         if (command instanceof PriceCommand) handlePriceCommand((PriceCommand)command);
         if (command instanceof FindChildCommand) handleFindChildCommand((FindChildCommand)command);
@@ -51,7 +50,7 @@ public class OrderCommandService {
         if (command instanceof OrderHistoryCommand) handleOrderHistoryCommand((OrderHistoryCommand)command);
     }
 
-    public void handleStartCommand(StartCommand command) throws TelegramApiException, JsonProcessingException {
+    public void handleStartCommand(StartCommand command) throws TelegramApiException {
 //        actionRepositoryImpl.save(command);
         var messages = new ArrayList<>(List.of(messageFactory.createReplyToStartCommand(command)));
         adminChatIds.forEach(id -> messages.add(new SendMessage(id, "Дана команда .start от @" + command.userName)));
@@ -134,15 +133,11 @@ public class OrderCommandService {
     }
 
     public void handleCheckoutCommand (CheckoutCommand checkoutCommand) throws TelegramApiException {
-        var order = orderRepository.findOrderInCartStatus(Long.valueOf(checkoutCommand.getUserId()));
-        if (order != null && order.getItems() != null){
-            order.setStatus("delivery");
-            orderRepository.saveOrder(order);
-            SendMessage message = new SendMessage(checkoutCommand.getChatId(), "Заказ оформлен");
-            var messages = new ArrayList<>(List.of(message));
-            adminChatIds.forEach(id -> messages.add(new SendMessage(id, "Оформил заказ @" + checkoutCommand.userName)));
-            sender.sendList(messages);
-        }
+        var order = orderRepository.findOrderInCartStatus(checkoutCommand.getUserId());
+        var addresses = addressRepository.findByUserId(checkoutCommand.getUserId());
+        var messages = messageFactory.createMessageForOrdering(checkoutCommand, addresses, order);
+        adminChatIds.forEach(id -> messages.add(new SendMessage(id, "Оформил заказ @" + checkoutCommand.userName)));
+        sender.sendList(messages);
     }
 
     public void handleActionHistoryCommand(ActionHistoryCommand command) throws TelegramApiException {
@@ -151,7 +146,7 @@ public class OrderCommandService {
     }
 
     public void handleOrderHistoryCommand(OrderHistoryCommand command) throws TelegramApiException {
-        var orders = orderRepository.findByUserId(String.valueOf(command.userId));
+        var orders = orderRepository.findByUserId(command.userId);
         SendMessage sendMessage = new SendMessage(command.chatId, /*command.userid*/"вы потратили очень много");
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         int j = 1;

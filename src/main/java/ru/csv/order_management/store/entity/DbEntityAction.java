@@ -22,7 +22,6 @@ import java.util.Date;
 })
 
 public class DbEntityAction implements Serializable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
