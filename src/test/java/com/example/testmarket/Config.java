@@ -6,7 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan("ru.exampl.bot2")
+@ComponentScan("ru.csv.order_management")
 public class Config {
 
     @Bean
