@@ -10,13 +10,13 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.csv.order_management.domain.command.FindChildCommand;
+import ru.csv.order_management.App;
+import ru.csv.order_management.domain.command.*;
 import ru.csv.order_management.store.entity.DbEntityOrder;
-import ru.csv.order_management.domain.command.BasketCommand;
-import ru.csv.order_management.domain.command.PriceCommand;
-import ru.csv.order_management.domain.command.StartCommand;
 import ru.csv.order_management.store.entity.DbEntityItems;
+import wiremock.com.github.jknack.handlebars.internal.antlr.misc.Interval;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,6 +75,69 @@ public class MessageFactory {
         return sendMessageList;
     }
 
+    public List<SendMessage> createMessageForChooseDate(ChooseDateCommand command, OffsetDateTime date){
+        log.info("createMessageForChooseDate");
+        SendMessage sendMessage = new SendMessage();
+
+        sendMessage.setChatId(command.chatId);
+        sendMessage.setText("Выберите желаемую дату");
+        List<SendMessage> sendMessageList = new ArrayList<>();
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
+                    date.plusDays(i+1).getDayOfWeek().toString()
+                            + " " + date.plusDays(i+1).getDayOfMonth()
+                            + " " + date.plusDays(i+1).getMonth()
+                            + " " + date.plusDays(i+1).getYear()
+            );
+            log.info("CHOOSE_TIME:" + date.plusDays(i+1).toInstant().toEpochMilli());
+            var cbd = "CHOOSE_TIME:" + date.plusDays(i+1).toInstant().toEpochMilli();
+            inlineKeyboardButton.setCallbackData(cbd);
+            inlineKeyboardButton.getSwitchInlineQuery();
+            List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+            keyboardButtonsRow1.add(inlineKeyboardButton);
+            rowList.add(keyboardButtonsRow1);
+        }
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        sendMessageList.add(sendMessage);
+        log.info("sendMessageList size" + sendMessageList.size());
+        return sendMessageList;
+    }
+
+    public List<SendMessage> createMessageForChooseTime(ChooseTimeCommand command){
+        log.info("createMessageForChooseTime");
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(command.chatId);
+        sendMessage.setText("Выберите время");
+        List<SendMessage> sendMessageList = new ArrayList<>();
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        List<String> timeslots = new ArrayList<>();
+        timeslots.add("9-00 - 10-00");
+        timeslots.add("10-00 - 11-00");
+        timeslots.add("11-00 - 12-00");
+        timeslots.add("12-00 - 13-00");
+        timeslots.add("13-00 - 14-00");
+        for (int i = 0; i < 5; i++) {
+            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
+                    timeslots.get(i)
+            );
+            var cbd = "ADD_TO_CART:" + timeslots.get(i);
+            inlineKeyboardButton.setCallbackData(cbd);
+            inlineKeyboardButton.getSwitchInlineQuery();
+            List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+            keyboardButtonsRow1.add(inlineKeyboardButton);
+            rowList.add(keyboardButtonsRow1);
+        }
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        sendMessageList.add(sendMessage);
+        log.info("sendMessageList size" + sendMessageList.size());
+        return sendMessageList;
+    }
+
     public List<SendMessage> createMessageForBasket (BasketCommand basketCommand, List<DbEntityItems> items){
         log.info("createMessageForBasket");
         SendMessage sendMessage = new SendMessage();
@@ -109,8 +172,10 @@ public class MessageFactory {
         KeyboardButton price = new KeyboardButton("Прайс");
         KeyboardButton basket = new KeyboardButton("Корзина");
         KeyboardButton checkout = new KeyboardButton("Оформить заказ");
+        KeyboardButton choseTime = new KeyboardButton("Выбрать время");
         List<KeyboardButton> keyboardButtons1 = new ArrayList<>();
         keyboardButtons1.add(price);
+        keyboardButtons1.add(choseTime);
         keyboardButtons1.add(basket);
         List<KeyboardButton> keyboardButtons2 = new ArrayList<>();
         keyboardButtons2.add(checkout);

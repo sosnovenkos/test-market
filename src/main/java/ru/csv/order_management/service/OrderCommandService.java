@@ -6,10 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.csv.order_management.domain.Order;
 import ru.csv.order_management.domain.command.*;
 import ru.csv.order_management.sender.Sender;
 import ru.csv.order_management.store.ActionRepositoryImpl;
@@ -18,6 +16,7 @@ import ru.csv.order_management.store.OrderRepositoryImpl;
 import ru.csv.order_management.store.entity.DbEntityItems;
 import ru.csv.order_management.store.entity.DbEntityOrder;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +48,8 @@ public class OrderCommandService {
         if (command instanceof CheckoutCommand) handleCheckoutCommand((CheckoutCommand)command);
         if (command instanceof ActionHistoryCommand) handleActionHistoryCommand((ActionHistoryCommand)command);
         if (command instanceof OrderHistoryCommand) handleOrderHistoryCommand((OrderHistoryCommand)command);
+        if (command instanceof ChooseDateCommand) handleChooseDateCommand((ChooseDateCommand) command);
+        if (command instanceof ChooseTimeCommand) handleChooseTimeCommand((ChooseTimeCommand) command);
     }
 
     public void handleStartCommand(StartCommand command) throws TelegramApiException, JsonProcessingException {
@@ -61,6 +62,21 @@ public class OrderCommandService {
     public void handlePriceCommand(PriceCommand command) throws TelegramApiException {
         var items = itemRepository.findHeadGroup();
         var message = messageFactory.createMessageForGroupList(command, items);
+        sender.sendList(message);
+    }
+
+    public void handleChooseDateCommand(ChooseDateCommand command) throws TelegramApiException {
+        log.info("ChooseDate");
+        var x = OffsetDateTime.now().plusDays(1).getDayOfWeek().toString();
+        var y = OffsetDateTime.now().plusDays(1).getDayOfMonth();
+        var message = messageFactory.createMessageForChooseDate(command, OffsetDateTime.now());
+        sender.sendList(message);
+        log.info(x + y);
+    }
+
+    public void handleChooseTimeCommand(ChooseTimeCommand command) throws TelegramApiException {
+        log.info("ChooseTime");
+        var message = messageFactory.createMessageForChooseTime(command);
         sender.sendList(message);
     }
 
