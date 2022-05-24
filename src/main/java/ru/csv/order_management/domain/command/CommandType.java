@@ -10,6 +10,8 @@ public enum CommandType {
     START(List.of("start", "старт", "/start")),
     HISTORY(List.of("history", "история")),
     PRICE(List.of("price", "прайс")),
+    ADD_ADDRESS(List.of("ADD_ADDR")),
+    SET_ADDRESS(List.of("SET_ADDR")),
     BASKET(List.of("basket", "корзина")),
     CHECKOUT(List.of("checkout", "оформить заказ")),
     ADD_ITEM(List.of("add Item", "Добавить товар")),

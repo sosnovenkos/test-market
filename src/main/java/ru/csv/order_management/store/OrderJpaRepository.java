@@ -9,5 +9,5 @@ import java.util.List;
 public interface OrderJpaRepository extends JpaRepository<DbEntityOrder, Long> {
     DbEntityOrder findByStatusAndUserId(String status, Long userId);
 
-    List<DbEntityOrder> findByUserId(Long userId);
+    List<DbEntityOrder> findAllByUserId(Long userId);
 }

@@ -11,22 +11,18 @@ import java.util.*;
 @Repository
 @AllArgsConstructor
 public class OrderRepositoryImpl {
-        private final OrderJpaRepository orderJpaRepository;
-
-
-
-    public List<DbEntityOrder> findByUserId(Long userid) {
-        return orderJpaRepository.findByUserId(userid);
-    }
-
+    private final OrderJpaRepository orderJpaRepository;
 
     public DbEntityOrder saveOrder(DbEntityOrder order) {
-        try {
-            return orderJpaRepository.save(order);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return order;
+        return orderJpaRepository.save(order);
+    }
+
+    public DbEntityOrder findById(Long id) {
+        return orderJpaRepository.findById(id).get();
+    }
+
+    public List<DbEntityOrder> findAllByUserId(Long userId) {
+        return orderJpaRepository.findAllByUserId(userId);
     }
 
     public DbEntityOrder findOrderInCartStatus(Long userId) {

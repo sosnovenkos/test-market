@@ -54,7 +54,7 @@ public class MessageFactory {
     public List<SendMessage> createMessageForItemsList(FindChildCommand command, DbEntityOrder order, List<DbEntityItems> items){
         log.info("Create Messages For Items");
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setText("Нажимайте на кнопки и добавляйте позиции в корзину");
+        sendMessage.setText("Нажимайте на позиции, чтобы ДОБАВИТЬ их в корзину");
         sendMessage.setChatId(command.chatId);
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -66,7 +66,7 @@ public class MessageFactory {
                 inlineKeyboardButton = new InlineKeyboardButton(item.getName());
                 callbackData = "price:";
             } else {
-                inlineKeyboardButton = new InlineKeyboardButton(item.getName() + " " + item.getDescription() + " гр. " + item.getPrice() + " руб.");
+                inlineKeyboardButton = new InlineKeyboardButton(item.getName() + " " + item.getWeight() + " гр. " + item.getPrice() + " руб.");
                 callbackData = "ADD_TO_CART:" + order.getId() + ":" + item.getId();
             }
             inlineKeyboardButton.setCallbackData(callbackData);
@@ -83,24 +83,24 @@ public class MessageFactory {
         return sendMessageList;
     }
 
-    public List<SendMessage> createMessageForBasket (BasketCommand command, List<DbEntityItems> items){
+    public List<SendMessage> createMessageForBasket (BasketCommand command, List<DbEntityItems> items, DbEntityOrder order){
         log.info("Create message for Basket: " + command.getUserId());
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setText("Нажимайте на кнопки и удляйте позиции из корзины");
+        sendMessage.setText("Нажимайте на позиции вашей корзины, чтобы УДАЛИТЬ их");
         sendMessage.setChatId(command.getChatId());
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-        for (int i = 0; i < items.size(); i++) {
+        items.forEach(item -> {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
-                    items.get(i).getName() + " " + items.get(i).getDescription() + " " + items.get(i).getPrice() + " руб.");
-            var cbd = "DEL_ITEM:" + items.get(i).getId().toString();
+                    item.getName() + " " + item.getWeight() + " гр, " + item.getPrice() + " руб.");
+            var cbd = "DEL_ITEM:" + item.getId().toString();
             inlineKeyboardButton.setCallbackData(cbd);
             inlineKeyboardButton.getSwitchInlineQuery();
             List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
             keyboardButtonsRow.add(inlineKeyboardButton);
             rowList.add(keyboardButtonsRow);
-        }
+        });
 
         inlineKeyboardMarkup.setKeyboard(rowList);
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
@@ -108,9 +108,7 @@ public class MessageFactory {
         log.info("Created Messages: .DEL_ITEM command: " + sendMessageList.size());
 
         SendMessage sendInfoMessage = new SendMessage();
-        var sum = items.stream().filter(item -> nonNull(item.getPrice())).mapToLong(DbEntityItems::getPrice).sum();
-        var weight = items.stream().filter(item -> nonNull(item.getPrice())).mapToLong(item -> Long.parseLong(item.getDescription())).sum();
-        sendInfoMessage.setText("Сумма заказа: " + sum + " руб. Вес заказа: " + weight / 1000.0 + " кг.");
+        sendInfoMessage.setText("Сумма заказа: " + order.getAmount() + " руб. Вес заказа: " + order.getWeight() / 1000.0 + " кг.");
         sendInfoMessage.setChatId(command.chatId);
         sendMessageList.add(sendInfoMessage);
 
@@ -118,7 +116,7 @@ public class MessageFactory {
     }
 
     public SendMessage createReplyToStartCommand(StartCommand command) {
-        SendMessage sendMessage = new SendMessage(command.chatId, command.firstName + ", добрый день!");
+        SendMessage sendMessage = new SendMessage(command.chatId, command.firstName + ", привет! Мы сами производим орехи и сухофрукты и продаем их по приятным для вас ценам. Жми на ПРАЙС.");
         KeyboardButton history = new KeyboardButton("История");
         KeyboardButton price = new KeyboardButton("Прайс");
         KeyboardButton basket = new KeyboardButton("Корзина");

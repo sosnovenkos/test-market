@@ -16,7 +16,7 @@ public class CommandFactory {
                             .userName(update.getMessage().getFrom().getUserName())
                             .build();
                 case HISTORY:
-                    return ActionHistoryCommand.builder()
+                    return OrderHistoryCommand.builder()
                             .userId(update.getMessage().getFrom().getId())
                             .chatId(update.getMessage().getChatId().toString())
                             .build();
@@ -36,7 +36,12 @@ public class CommandFactory {
                             .chatId(update.getMessage().getChatId().toString())
                             .userName(update.getMessage().getFrom().getUserName())
                             .build();
-
+                default:
+                    return WaitingForActionCommand.builder()
+                            .userId(update.getMessage().getFrom().getId())
+                            .chatId(update.getMessage().getChatId().toString())
+                            .text(update.getMessage().getText())
+                            .build();
             }
         } else if (update.hasCallbackQuery() && update.getCallbackQuery().getData() != null) {
             switch (CommandType.from(update.getCallbackQuery().getData().split(":")[0])) {
@@ -69,7 +74,18 @@ public class CommandFactory {
                             .userId(update.getCallbackQuery().getFrom().getId())
                             .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
                             .build();
-
+                case ADD_ADDRESS:
+                    return AddAddressCommand.builder()
+                            .userId(update.getCallbackQuery().getFrom().getId())
+                            .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
+                            .build();
+                case SET_ADDRESS:
+                    return SetAddressCommand.builder()
+                            .userId(update.getCallbackQuery().getFrom().getId())
+                            .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
+                            .orderId(Long.valueOf(update.getCallbackQuery().getData().split(DELIMITER)[1]))
+                            .addressId(Long.valueOf(update.getCallbackQuery().getData().split(DELIMITER)[2]))
+                            .build();
             }
         }
         return null;

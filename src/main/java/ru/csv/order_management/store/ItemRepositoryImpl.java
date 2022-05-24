@@ -27,4 +27,8 @@ public class ItemRepositoryImpl {
     public DbEntityItems findItem(Long id){
         return itemJpaRepository.findById(id).get();
     }
+
+    public List<DbEntityItems> findItems(List<Long> ids) {
+        return itemJpaRepository.findAllById(ids);
+    }
 }

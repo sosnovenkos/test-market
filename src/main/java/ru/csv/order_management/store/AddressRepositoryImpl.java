@@ -11,16 +11,17 @@ import java.util.List;
 @Repository
 @AllArgsConstructor
 public class AddressRepositoryImpl {
-        private final AddressJpaRepository addressJpaRepository;
+    private final AddressJpaRepository addressJpaRepository;
 
-
-
-    public List<DbEntityAddress> findByUserId(Long userid) {
-        return addressJpaRepository.findByUserId(userid);
+    public List<DbEntityAddress> findByUserId(Long userId) {
+        return addressJpaRepository.findByUserId(userId);
     }
 
+    public DbEntityAddress findById(Long addressId) {
+        return addressJpaRepository.findById(addressId).get();
+    }
 
     public DbEntityAddress save(DbEntityAddress address) {
-            return addressJpaRepository.save(address);
+        return addressJpaRepository.save(address);
     }
 }

@@ -9,7 +9,6 @@ import javax.persistence.*;
 @Entity
 @Table(name = "orders_items")
 public class DbEntityOrdersItems {
-
     @Id
     @GeneratedValue
     @Column(name = "id", nullable = false)

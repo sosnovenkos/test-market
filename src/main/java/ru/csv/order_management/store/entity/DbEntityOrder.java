@@ -34,6 +34,15 @@ public class DbEntityOrder {
     @Column(name = "status")
     private String status;
 
+    @Column(name = "address_id")
+    private Long addressId;
+
+    @Column(name = "amount")
+    private Long amount;
+
+    @Column(name = "weight")
+    private Long weight;
+
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
 }
