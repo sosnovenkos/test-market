@@ -57,6 +57,13 @@ public class CommandFactory {
                         .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
                         .itemId(Long.valueOf(update.getCallbackQuery().getData().split(DELIMITER)[2]))
                         .build();
+            case ADD_TO_CART_FOR_ENTRY:
+                return AddItemCommandForEntry.builder()
+                        .userId(update.getCallbackQuery().getFrom().getId())
+                        .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
+                        .date(update.getCallbackQuery().getData().split(DELIMITER)[1])
+                        .time(update.getCallbackQuery().getData().split(DELIMITER)[2])
+                        .build();
             case DELETE_ITEM:
                 return DelItemCommand.builder()
                         .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
@@ -73,6 +80,7 @@ public class CommandFactory {
                         .userId(update.getCallbackQuery().getFrom().getId())
                         .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
                         .date(OffsetDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(update.getCallbackQuery().getData().split(DELIMITER)[1])), ZoneId.systemDefault()))
+                        .parentId(Long.valueOf(update.getCallbackQuery().getData().split(DELIMITER)[2]))
                         .build();
             default:
                 return null;

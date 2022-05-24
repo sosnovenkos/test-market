@@ -14,6 +14,7 @@ import ru.csv.order_management.App;
 import ru.csv.order_management.domain.command.*;
 import ru.csv.order_management.store.entity.DbEntityOrder;
 import ru.csv.order_management.store.entity.DbEntityItems;
+import ru.csv.order_management.store.entity.DbEntityTimeslot;
 import wiremock.com.github.jknack.handlebars.internal.antlr.misc.Interval;
 
 import java.time.OffsetDateTime;
@@ -91,8 +92,8 @@ public class MessageFactory {
                             + " " + date.plusDays(i+1).getMonth()
                             + " " + date.plusDays(i+1).getYear()
             );
-            log.info("CHOOSE_TIME:" + date.plusDays(i+1).toInstant().toEpochMilli());
-            var cbd = "CHOOSE_TIME:" + date.plusDays(i+1).toInstant().toEpochMilli();
+            var cbd = "CHOOSE_TIME:" + date.plusDays(i+1).toInstant().toEpochMilli() + ":" + date.plusDays(i+1).getDayOfWeek().getValue();
+            log.info("CHOOSE_TIME:" + date.plusDays(i+1).toInstant().toEpochMilli()+ ":" + date.plusDays(i+1).getDayOfWeek().getValue());
             inlineKeyboardButton.setCallbackData(cbd);
             inlineKeyboardButton.getSwitchInlineQuery();
             List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
@@ -106,7 +107,7 @@ public class MessageFactory {
         return sendMessageList;
     }
 
-    public List<SendMessage> createMessageForChooseTime(ChooseTimeCommand command){
+    public List<SendMessage> createMessageForChooseTime(ChooseTimeCommand command, List<DbEntityTimeslot> timeslots){
         log.info("createMessageForChooseTime");
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(command.chatId);
@@ -114,17 +115,19 @@ public class MessageFactory {
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-        List<String> timeslots = new ArrayList<>();
-        timeslots.add("9-00 - 10-00");
-        timeslots.add("10-00 - 11-00");
-        timeslots.add("11-00 - 12-00");
-        timeslots.add("12-00 - 13-00");
-        timeslots.add("13-00 - 14-00");
-        for (int i = 0; i < 5; i++) {
+//        List<String> timeslots = new ArrayList<>();
+//        timeslots.add("9-00 - 10-00");
+//        timeslots.add("10-00 - 11-00");
+//        timeslots.add("11-00 - 12-00");
+//        timeslots.add("12-00 - 13-00");
+//        timeslots.add("13-00 - 14-00");
+        for (int i = 0; i < timeslots.size(); i++) {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
-                    timeslots.get(i)
+                    timeslots.get(i).getTimeslot()
             );
-            var cbd = "ADD_TO_CART:" + timeslots.get(i);
+            var cbd = "ADD_TO_CART_FOR_ENTRY:" + command.getDate().toString().split(":")[0] + ":" + timeslots.get(i).getTimeslot();
+            log.info("ADD_TO_CART_FOR_ENTRY:" + command.getDate().toString().split(":")[0] + ":" + timeslots.get(i).getTimeslot());
+
             inlineKeyboardButton.setCallbackData(cbd);
             inlineKeyboardButton.getSwitchInlineQuery();
             List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();

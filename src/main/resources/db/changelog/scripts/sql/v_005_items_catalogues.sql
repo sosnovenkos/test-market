@@ -5,7 +5,7 @@
 delete from test_market.orders;
 delete from test_market.items;
 ALTER TABLE test_market.items
-    ADD COLUMN parent_id BIGINT;
+    ADD COLUMN IF NOT EXISTS parent_id BIGINT;
 insert into test_market.items (product_code, name, description, price, "count", parent_id) values
                                                                                     ('1', 'Миндаль', '500 гр.', 500.00, 5, 11),
                                                                                     ('2', 'Грецкий орех', '500 гр.', 400.00, 10, 11),

@@ -7,15 +7,14 @@ import java.time.OffsetDateTime;
 
 @Data
 @Builder
-public class ChooseTimeCommand implements Command{
-    public Long userId;
-    public OffsetDateTime date;
-    public String time;
+public class AddItemCommandForEntry implements Command{
     public String chatId;
-    public Long parentId;
+    public Long userId;
+    public String date;
+    public String time;
 
     @Override
     public Long getId() {
-        return null;
+        return userId;
     }
 }
