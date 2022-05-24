@@ -1,12 +1,10 @@
 package ru.csv.order_management.store;
 
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import ru.csv.order_management.domain.Order;
 import ru.csv.order_management.store.entity.DbEntityOrder;
 
-import java.util.*;
+import java.util.List;
 
 @Repository
 @AllArgsConstructor
