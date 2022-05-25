@@ -11,6 +11,7 @@ public class StartCommand implements Command {
     public String firstName;
     public String userName;
     public Long userId;
+    public Integer messageId;
 
     @Override
     public Long getId() {

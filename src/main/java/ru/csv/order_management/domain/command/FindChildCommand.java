@@ -10,6 +10,7 @@ public class FindChildCommand implements Command {
     public Long userId;
     public Long parentId;
     public String chatId;
+    public Integer messageId;
 
     @Override
     public Long getId() {

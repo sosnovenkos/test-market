@@ -9,6 +9,7 @@ import ru.csv.order_management.service.OrderCommandService;
 public class BasketCommand implements Command {
     public String chatId;
     public Long userId;
+    public Integer messageId;
 
     @Override
     public Long getId() {

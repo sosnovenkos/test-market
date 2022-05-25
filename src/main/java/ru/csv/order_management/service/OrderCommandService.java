@@ -5,12 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.csv.order_management.domain.command.*;
 import ru.csv.order_management.domain.context.*;
-import ru.csv.order_management.store.ActionRepositoryImpl;
-import ru.csv.order_management.store.AddressRepositoryImpl;
-import ru.csv.order_management.store.ItemRepositoryImpl;
-import ru.csv.order_management.store.OrderRepositoryImpl;
-import ru.csv.order_management.store.entity.Address;
+import ru.csv.order_management.store.*;
 import ru.csv.order_management.store.entity.Action;
+import ru.csv.order_management.store.entity.Address;
 import ru.csv.order_management.store.entity.Items;
 import ru.csv.order_management.store.entity.Order;
 
@@ -30,18 +27,27 @@ public class OrderCommandService {
     private final OrderRepositoryImpl orderRepository;
     private final AddressRepositoryImpl addressRepository;
     private final ActionRepositoryImpl actionRepositoryImpl;
+    private final MessageToBeDeletedRepositoryImpl messageToBeDeletedRepository;
 
     public void handle(Command command) {
         command.handle(this);
     }
 
     public void handle(StartCommand command) {
-        sender.prepareAndSend(StartCommandContext.builder().command(command).build());
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(StartCommandContext.builder().command(command).build());
+        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
     public void handle(PriceCommand command) {
         var items = itemRepository.findHeadGroup();
-        sender.prepareAndSend(PriceCommandContext.builder().command(command).items(items).build());
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(PriceCommandContext.builder().command(command).items(items).build());
+        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
     public void handle(FindChildCommand command) {
@@ -50,12 +56,16 @@ public class OrderCommandService {
             order = new Order();
             order.setStatus("cart");
             order.setUserId(command.getUserId());
+            order.setCreatedAt(OffsetDateTime.now());
             orderRepository.saveOrder(order);
         }
         var items = itemRepository.findChildGroup(command.parentId);
 
-        var toDeleteMessages = sender.prepareAndSend(FindChildCommandContext.builder().command(command).order(order).items(items).build());
-//        toBeDeletedMessagesRepository
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(FindChildCommandContext.builder().command(command).order(order).items(items).build());
+        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
     public void handle(AddItemCommand command) {
@@ -68,14 +78,30 @@ public class OrderCommandService {
             }
             orderRepository.saveOrder(order);
         }
-        sender.prepareAndSend(AddItemCommandContext.builder().command(command).order(order).build());
+
+        var item = itemRepository.findItem(command.itemId);
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(AddItemCommandContext.builder().command(command).order(order).build());
+        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
+
+        handle(FindChildCommand.builder()
+                .chatId(command.getChatId())
+                .userId(command.getUserId())
+                .parentId(item.getParentId())
+                .build());
     }
 
     public void handle(DelItemCommand command) {
         var order = orderRepository.findOrderInCartStatus(command.getUserId());
         order.getItems().remove(command.getItemId());
         orderRepository.saveOrder(order);
-        sender.prepareAndSend(DelItemCommandContext.builder().command(command).build());
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(DelItemCommandContext.builder().command(command).build());
+        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
 
         handle(BasketCommand.builder()
                 .chatId(command.getChatId())
@@ -86,10 +112,14 @@ public class OrderCommandService {
 
     public void handle(GetItemInfoCommand command) {
         var item = itemRepository.findItem(Long.valueOf(command.getItemId()));
-        sender.prepareAndSend(GetItemInfoCommandContext.builder()
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(GetItemInfoCommandContext.builder()
                 .command(command)
                 .item(item)
                 .build());
+        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
     public void handle(BasketCommand command) {
@@ -105,30 +135,41 @@ public class OrderCommandService {
             orderRepository.saveOrder(order);
         }
 
-        sender.prepareAndSend(BasketCommandContext.builder()
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(BasketCommandContext.builder()
                 .command(command)
                 .items(items)
                 .order(order)
                 .build());
-
+        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);;
     }
 
-    public void handle (CheckoutCommand checkoutCommand) {
-        var order = orderRepository.findOrderInCartStatus(checkoutCommand.getUserId());
-        var addresses = addressRepository.findByUserId(checkoutCommand.getUserId());
-        sender.prepareAndSend(CheckoutCommandContext.builder()
-                .command(checkoutCommand)
+    public void handle (CheckoutCommand command) {
+        var order = orderRepository.findOrderInCartStatus(command.getUserId());
+        var addresses = addressRepository.findByUserId(command.getUserId());
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(CheckoutCommandContext.builder()
+                .command(command)
                 .order(order)
                 .addresses(addresses)
                 .build());
+        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
     public void handle(OrderHistoryCommand command) {
         var orders = orderRepository.findAllByUserId(command.userId);
-        sender.prepareAndSend(OrderHistoryCommandContext.builder()
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(OrderHistoryCommandContext.builder()
                 .command(command)
                 .orders(orders)
                 .build());
+        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
     public void handle(AddAddressCommand command) {
@@ -137,10 +178,14 @@ public class OrderCommandService {
         action.setWaitingForAction(true);
         action.setData("address");
         actionRepositoryImpl.save(action);
-        sender.prepareAndSend(AddAddressCommandContext.builder()
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(AddAddressCommandContext.builder()
                 .command(command)
                 .text("Введите адрес в формате ГОРОД УЛИЦА ДОМ КВАРТИРА, например \"Железнодорожный Пролетарская 2 35\"")
                 .build());
+        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
     public void handle(WaitingForActionCommand command) {
@@ -167,10 +212,14 @@ public class OrderCommandService {
             text = "Адрес добавлен. Нажмите Оформить заказ.";
         }
 
-        sender.prepareAndSend(WaitingForActionCommandContext.builder()
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(WaitingForActionCommandContext.builder()
                 .command(command)
                 .text(text)
                 .build());
+        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
     public void handle(SetAddressCommand command) {
@@ -182,13 +231,15 @@ public class OrderCommandService {
         var items = itemRepository.findItems(order.getItems());
         var address = addressRepository.findById(command.addressId);
 
-        sender.prepareAndSend(SetAddressCommandContext.builder()
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(SetAddressCommandContext.builder()
                 .command(command)
                 .order(order)
                 .address(address)
                 .items(items)
                 .build());
+        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
-
-
 }

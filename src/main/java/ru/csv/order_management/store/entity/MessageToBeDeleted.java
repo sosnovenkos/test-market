@@ -8,10 +8,10 @@ import javax.persistence.*;
 @Data
 @Entity
 @Table(name = "to_be_deleted_message")
-public class ToBeDeletedMessages {
+public class MessageToBeDeleted {
     @Id
-    @GeneratedValue
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "user_id")

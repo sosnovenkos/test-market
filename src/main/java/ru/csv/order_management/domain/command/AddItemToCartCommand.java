@@ -9,6 +9,7 @@ public class AddItemToCartCommand implements Command {
     public Long userId;
     public String orderId;
     public String itemId;
+    public Integer messageId;
 
     @Override
     public Long getId() {

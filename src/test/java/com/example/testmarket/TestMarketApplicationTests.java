@@ -194,7 +194,7 @@ class TestMarketApplicationTests {
 
 	@Test
 	void sdf() throws TelegramApiException {
-		sender.send(List.of(new DeleteMessage("387340096", 631)));
+//		sender.send(List.of(new DeleteMessage("387340096", 631)));
 	}
 
 }

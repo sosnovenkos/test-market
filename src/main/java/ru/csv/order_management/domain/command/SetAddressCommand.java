@@ -11,6 +11,7 @@ public class SetAddressCommand implements Command {
     public String chatId;
     public Long orderId;
     public Long addressId;
+    public Integer messageId;
 
     @Override
     public Long getId() {

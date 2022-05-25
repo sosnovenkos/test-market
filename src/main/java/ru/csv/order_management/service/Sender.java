@@ -1,10 +1,12 @@
 package ru.csv.order_management.service;
 
-import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.csv.order_management.domain.context.Context;
+import ru.csv.order_management.store.entity.MessageToBeDeleted;
 
 import java.util.List;
 
 public interface Sender  {
-    List<Message> prepareAndSend(Context context);
+    List<MessageToBeDeleted> prepareAndSend(Context context);
+
+    void delete(List<MessageToBeDeleted> messagesToBeDeleted);
 }

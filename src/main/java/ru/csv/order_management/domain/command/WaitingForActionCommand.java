@@ -10,6 +10,7 @@ public class WaitingForActionCommand implements Command {
     public Long userId;
     public String chatId;
     public String text;
+    public Integer messageId;
 
     @Override
     public Long getId() {

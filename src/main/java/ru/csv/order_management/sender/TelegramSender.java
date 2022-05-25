@@ -14,8 +14,9 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.csv.order_management.domain.context.Context;
-import ru.csv.order_management.service.MessageFactory;
+import ru.csv.order_management.domain.context.StartCommandContext;
 import ru.csv.order_management.service.Sender;
+import ru.csv.order_management.store.entity.MessageToBeDeleted;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,8 @@ import java.util.List;
 public class TelegramSender extends DefaultAbsSender implements Sender {
     @Value("${bot.token}")
     private String token;
+
+    private static final List<String> NOT_DELETED_MESSAGES = List.of("Воспользуйтесь меню.");
 
     @Autowired
     private MessageFactory messageFactory;
@@ -51,15 +54,44 @@ public class TelegramSender extends DefaultAbsSender implements Sender {
         return executedMessages;
     }
 
-    public void send(List<DeleteMessage> deleteMessages) throws TelegramApiException {
-        for (DeleteMessage sendMessage : deleteMessages) {
-            var x = execute(sendMessage);
+    @Override
+    @SneakyThrows
+    public void delete(List<MessageToBeDeleted> deleteMessages) {
+        for (MessageToBeDeleted deleteMessage : deleteMessages) {
+            execute(new DeleteMessage(deleteMessage.getChatId().toString(), deleteMessage.getMessageId()));
         }
     }
 
     @Override
     @SneakyThrows
-    public List<Message> prepareAndSend(Context context) {
-       return sendList(messageFactory.createMessages(context));
+    public List<MessageToBeDeleted> prepareAndSend(Context context) {
+        return convert(sendList(messageFactory.createMessages(context)), context);
+    }
+
+    List<MessageToBeDeleted> convert(List<Message> telegramMessages, Context context) {
+        List<MessageToBeDeleted> messagesToBeDeleted = new ArrayList<>();
+
+        if (context.getMessageId() != null) {
+            var userMessageToBeDeleted = new MessageToBeDeleted();
+            userMessageToBeDeleted.setUserId(context.getUserId());
+            userMessageToBeDeleted.setChatId(context.getChatId());
+            userMessageToBeDeleted.setMessageId(context.getMessageId());
+            messagesToBeDeleted.add(userMessageToBeDeleted);
+        }
+
+//        if (context instanceof StartCommandContext) return messagesToBeDeleted;
+
+        for (Message telegramMessage : telegramMessages) {
+            if (NOT_DELETED_MESSAGES.contains(telegramMessage.getText())) continue;
+            var messageToBeDeleted = new MessageToBeDeleted();
+            messageToBeDeleted.setUserId(context.getUserId());
+            messageToBeDeleted.setChatId(telegramMessage.getChatId());
+            messageToBeDeleted.setMessageId(telegramMessage.getMessageId());
+            messagesToBeDeleted.add(messageToBeDeleted);
+        }
+
+
+
+        return messagesToBeDeleted;
     }
 }

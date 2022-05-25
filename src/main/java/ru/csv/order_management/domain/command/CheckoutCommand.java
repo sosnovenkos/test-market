@@ -10,6 +10,7 @@ public class CheckoutCommand implements Command {
     public String chatId;
     public Long userId;
     public String userName;
+    public Integer messageId;
 
     @Override
     public Long getId() {

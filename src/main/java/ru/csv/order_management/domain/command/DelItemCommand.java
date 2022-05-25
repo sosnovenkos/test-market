@@ -11,6 +11,7 @@ public class DelItemCommand implements Command {
     public Long userId;
     public Long itemId;
     public String chatId;
+    public Integer messageId;
 
     @Override
     public Long getId() {

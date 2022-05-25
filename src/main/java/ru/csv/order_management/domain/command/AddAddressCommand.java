@@ -9,6 +9,7 @@ import ru.csv.order_management.service.OrderCommandService;
 public class AddAddressCommand implements Command {
     public Long userId;
     public String chatId;
+    public Integer messageId;
 
     @Override
     public Long getId() {

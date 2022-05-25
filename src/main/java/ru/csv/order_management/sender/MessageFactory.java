@@ -1,4 +1,4 @@
-package ru.csv.order_management.service;
+package ru.csv.order_management.sender;
 
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -23,7 +23,7 @@ import java.util.List;
 public class MessageFactory {
     private final List<String> PRODUCT_CODE_AS_BACK = List.of("14", "15", "16");
 
-    @Value("${bot.admin.chat-ids}")
+//    @Value("${bot.admin.chat-ids}")
     private List<String> adminChatIds;
 
     @SneakyThrows
@@ -144,8 +144,9 @@ public class MessageFactory {
     }
 
     public List<SendMessage> createMessages(StartCommandContext context) {
-        SendMessage sendMessage = new SendMessage(context.command.chatId, context.command.firstName + ", привет! " +
-                "Мы сами производим орехи и сухофрукты и продаем их по приятным для вас ценам. Жми на ПРАЙС.");
+        var messages = new ArrayList<>(List.of(new SendMessage(context.command.chatId, context.command.firstName + ", привет! " +
+                "Мы сами производим орехи и сухофрукты и продаем их по приятным для вас ценам.")));
+        SendMessage sendMessage = new SendMessage(context.command.chatId, "Воспользуйтесь меню.");
         KeyboardButton history = new KeyboardButton("История");
         KeyboardButton price = new KeyboardButton("Прайс");
         KeyboardButton basket = new KeyboardButton("Корзина");
@@ -167,8 +168,8 @@ public class MessageFactory {
         sendMessage.enableMarkdown(true);
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
 
-        var messages = new ArrayList<>(List.of(sendMessage));
-        adminChatIds.forEach(id -> messages.add(new SendMessage(id, "Дана команда .start от @" + context.command.userName)));
+        messages.add(sendMessage);
+//        adminChatIds.forEach(id -> messages.add(new SendMessage(id, "Дана команда .start от @" + context.command.userName)));
 
         return messages;
     }
@@ -206,7 +207,7 @@ public class MessageFactory {
         sendMessageList.add(sendMessage);
         log.info("Created Messages: .SET_ADDR command: " + sendMessageList.size());
 
-        adminChatIds.forEach(id -> sendMessageList.add(new SendMessage(id, "Пытался оформить заказ @" + context.command.userName)));
+//        adminChatIds.forEach(id -> sendMessageList.add(new SendMessage(id, "Пытался оформить заказ @" + context.command.userName)));
         return sendMessageList;
     }
 
@@ -237,7 +238,7 @@ public class MessageFactory {
     public List<SendMessage> createMessages(SetAddressCommandContext context) {
         var messages = new ArrayList<>(List.of(new SendMessage(context.command.getChatId(), "Спасибо за заказ. " +
                 "В ближайшее время мы свяжемся с вами для уточнения деталей доставки.")));
-        adminChatIds.forEach(id -> {
+/*        adminChatIds.forEach(id -> {
             messages.add(new SendMessage(id, "Поступил заказ (" + context.order.getWeight() / 1000.0 +
                     " кг, " + context.order.getAmount() + " руб.):"));
 
@@ -246,7 +247,7 @@ public class MessageFactory {
             messages.add(new SendMessage(id, "Доставка по адресу: " + context.address.getDescription() +
                     ", звонить для согласования времени доставки: " + context.address.getPhone()));
                 }
-        );
+        );*/
 
         return messages;
     }
