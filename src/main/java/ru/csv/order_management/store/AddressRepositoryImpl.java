@@ -2,9 +2,7 @@ package ru.csv.order_management.store;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.csv.order_management.store.entity.DbEntityAddress;
-import ru.csv.order_management.store.entity.DbEntityOrder;
-import ru.csv.order_management.store.entity.DbEntityUser;
+import ru.csv.order_management.store.entity.Address;
 
 import java.util.List;
 
@@ -13,15 +11,15 @@ import java.util.List;
 public class AddressRepositoryImpl {
     private final AddressJpaRepository addressJpaRepository;
 
-    public List<DbEntityAddress> findByUserId(Long userId) {
+    public List<Address> findByUserId(Long userId) {
         return addressJpaRepository.findByUserId(userId);
     }
 
-    public DbEntityAddress findById(Long addressId) {
+    public Address findById(Long addressId) {
         return addressJpaRepository.findById(addressId).get();
     }
 
-    public DbEntityAddress save(DbEntityAddress address) {
+    public Address save(Address address) {
         return addressJpaRepository.save(address);
     }
 }

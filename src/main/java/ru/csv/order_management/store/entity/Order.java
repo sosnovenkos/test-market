@@ -18,7 +18,7 @@ import java.util.List;
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 })
 
-public class DbEntityOrder {
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
