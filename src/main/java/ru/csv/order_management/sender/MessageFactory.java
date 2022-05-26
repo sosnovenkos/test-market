@@ -12,10 +12,13 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.csv.order_management.domain.context.*;
+import ru.csv.order_management.store.entity.Order;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -177,8 +180,12 @@ public class MessageFactory {
     public List<SendMessage> createMessages(CheckoutCommandContext context) {
         log.info("Create message for Ordering: " + context.command.getUserId());
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setText("Выберите ваши адреса доставки или создайте новый: ");
         sendMessage.setChatId(context.command.getChatId());
+        if (context.order == null || context.order.getItems() == null || context.order.getItems().size() == 0) {
+            sendMessage.setText("Вам пока нечено оформлять.");
+            return List.of(sendMessage);
+        }
+        sendMessage.setText("Выберите ваши адреса доставки или создайте новый: ");
 
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -218,9 +225,15 @@ public class MessageFactory {
         } else {
             var dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
             messages.add(new SendMessage(context.command.getChatId(), "Ваши заказы:"));
-            context.orders.forEach(order -> messages.add(new SendMessage(context.command.getChatId(), ". Заказ " + order.getId() +
-                    " от " + order.getCreatedAt().format(dateTimeFormatter) + " на " + order.getAmount() +
-                    " руб, " + order.getWeight() / 1000.0 + " кг"))
+            context.orders.stream().sorted(Comparator.comparing(Order::getCreatedAt)).collect(Collectors.toList()).forEach(order -> {
+                if (order.getItems() == null)
+                    messages.add(new SendMessage(context.command.getChatId(), ". Заказ " + order.getId() +
+                            " от " + order.getCreatedAt().format(dateTimeFormatter) + ". Статус: " + order.getStatus()));
+                    else
+                        messages.add(new SendMessage(context.command.getChatId(), ". Заказ " + order.getId() +
+                                " от " + order.getCreatedAt().format(dateTimeFormatter) + " на " + order.getAmount() +
+                                " руб, " + order.getWeight() / 1000.0 + " кг. Статус: " + order.getStatus()));
+                    }
             );
         }
 
