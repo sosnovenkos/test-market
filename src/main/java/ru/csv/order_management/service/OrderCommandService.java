@@ -3,12 +3,15 @@ package ru.csv.order_management.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.csv.order_management.domain.command.*;
 import ru.csv.order_management.domain.context.*;
 import ru.csv.order_management.store.*;
 import ru.csv.order_management.store.entity.*;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -235,6 +238,55 @@ public class OrderCommandService {
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);
+    }
+
+    public void handleChooseDateCommand(ChooseDateCommand command) throws TelegramApiException {
+        log.info("ChooseDate");
+        var x = OffsetDateTime.now().plusDays(1).getDayOfWeek().toString();
+        var y = OffsetDateTime.now().plusDays(1).getDayOfMonth();
+        var message = messageFactory.createMessageForChooseDate(command, OffsetDateTime.now());
+        sender.sendList(message);
+        log.info(x + y);
+    }
+
+    public void handleChooseTimeCommand(ChooseTimeCommand command) throws TelegramApiException {
+        log.info("ChooseTime");
+        var x = OffsetDateTime.now();
+        var timeslotsAll = timeslotRepository.findChildGroup(command.parentId);
+        var date = command.getDate().toString().split("T")[0];
+        var findDates = orderRepository.findDate(date);
+        if (findDates.size() != 0) {
+            List<DbEntityTimeslot> timeslotsFind = new ArrayList<>();
+            for (int i = 0; i < findDates.size(); i++) {
+                DbEntityTimeslot timeslotFind = new DbEntityTimeslot();
+                timeslotFind.setTimeslot(findDates.get(i).getTime());
+                timeslotFind.setId(findDates.get(i).getTimeslotId());
+                timeslotFind.setParentId(command.parentId);
+                timeslotsFind.add(timeslotFind);
+            }
+            timeslotsAll.removeAll(timeslotsFind);
+        }
+        var message = messageFactory.createMessageForChooseTime(command, timeslotsAll);
+        sender.sendList(message);
+    }
+
+    public void handleAddItemCommandForEntry (AddItemCommandForEntry addItemCommandToEntry) throws TelegramApiException {
+        log.info("addItemCommandToEntry: " + addItemCommandToEntry.toString());
+        var order = orderRepository.findOrderInCartStatus(addItemCommandToEntry.getUserId());
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(addItemCommandToEntry.chatId);
+        if (order == null) {
+            order = new DbEntityOrder();
+            order.setUserId(addItemCommandToEntry.getUserId());
+            order.setDate(addItemCommandToEntry.getDate());
+            order.setTime(addItemCommandToEntry.getTime());
+            order.setTimeslotId(addItemCommandToEntry.getTimeslotId());
+            orderRepository.saveOrder(order);
+            sendMessage.setText("Вы успешно записаны");
+        } else {
+            sendMessage.setText("Запись уже существует");
+        }
+        sender.send(sendMessage);
     }
 
     private List<MessageToBeDeleted> filter(List<MessageToBeDeleted> messagesToBeDeletedNow) {
