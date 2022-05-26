@@ -2,6 +2,10 @@ package ru.csv.order_management.domain.command;
 
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+
 public class CommandFactory {
     private static final String DELIMITER = ":";
 
@@ -40,6 +44,11 @@ public class CommandFactory {
                             .chatId(update.getMessage().getChatId().toString())
                             .userName(update.getMessage().getFrom().getUserName())
                             .messageId(update.getMessage().getMessageId())
+                            .build();
+                case CHOOSE_DATE:
+                    return ChooseDateCommand.builder()
+                            .userId(update.getMessage().getFrom().getId())
+                            .chatId(update.getMessage().getChatId().toString())
                             .build();
                 default:
                     return WaitingForActionCommand.builder()
@@ -106,6 +115,13 @@ public class CommandFactory {
 //                            .messageId(update.getCallbackQuery().getMessage().getMessageId())
                             .orderId(Long.valueOf(update.getCallbackQuery().getData().split(DELIMITER)[1]))
                             .addressId(Long.valueOf(update.getCallbackQuery().getData().split(DELIMITER)[2]))
+                            .build();
+                case CHOOSE_TIME:
+                    return ChooseTimeCommand.builder()
+                            .userId(update.getCallbackQuery().getFrom().getId())
+                            .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
+                            .date(OffsetDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(update.getCallbackQuery().getData().split(DELIMITER)[1])), ZoneId.systemDefault()))
+                            .parentId(Long.valueOf(update.getCallbackQuery().getData().split(DELIMITER)[2]))
                             .build();
             }
         }

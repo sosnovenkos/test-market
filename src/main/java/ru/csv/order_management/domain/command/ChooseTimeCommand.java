@@ -4,14 +4,15 @@ import lombok.Builder;
 import lombok.Data;
 import ru.csv.order_management.service.OrderCommandService;
 
+import java.time.OffsetDateTime;
+
 @Data
 @Builder
-public class AddItemCommandForEntry implements Command{
+public class ChooseTimeCommand implements Command {
+    public long userId;
     public String chatId;
-    public Long userId;
-    public Long timeslotId;
-    public String date;
-    public String time;
+    public OffsetDateTime date;
+    public long parentId;
 
     @Override
     public Long getId() {
