@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 @Table(name = "user")
 @TypeDefs({ @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
-public class DbEntityUser {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

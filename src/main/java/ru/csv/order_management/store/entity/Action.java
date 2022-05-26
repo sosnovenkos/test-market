@@ -10,7 +10,7 @@ import java.time.OffsetDateTime;
 @Data
 @Entity
 @Table(name = "action")
-public class DbEntityAction implements Serializable {
+public class Action implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

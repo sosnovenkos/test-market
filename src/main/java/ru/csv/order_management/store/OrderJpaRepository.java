@@ -1,13 +1,13 @@
 package ru.csv.order_management.store;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.csv.order_management.store.entity.DbEntityOrder;
+import ru.csv.order_management.store.entity.Order;
 
 import java.util.List;
 
 
-public interface OrderJpaRepository extends JpaRepository<DbEntityOrder, Long> {
-    DbEntityOrder findByStatusAndUserId(String status, Long userId);
+public interface OrderJpaRepository extends JpaRepository<Order, Long> {
+    Order findByStatusAndUserId(String status, Long userId);
 
-    List<DbEntityOrder> findAllByUserId(Long userId);
+    List<Order> findAllByUserId(Long userId);
 }

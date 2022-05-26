@@ -2,7 +2,7 @@ package ru.csv.order_management.store;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import ru.csv.order_management.store.entity.DbEntityItems;
+import ru.csv.order_management.store.entity.Items;
 
 import java.util.List;
 
@@ -12,23 +12,23 @@ public class ItemRepositoryImpl {
     @Autowired
     private ItemJpaRepository itemJpaRepository;
 
-    public List<DbEntityItems> findAllItems() {
+    public List<Items> findAllItems() {
         return itemJpaRepository.findAll();
     }
 
-    public List<DbEntityItems> findHeadGroup() {
+    public List<Items> findHeadGroup() {
         return itemJpaRepository.findByParentId(null);
     }
 
-    public List<DbEntityItems> findChildGroup(Long parentId) {
+    public List<Items> findChildGroup(Long parentId) {
         return itemJpaRepository.findByParentId(parentId);
     }
 
-    public DbEntityItems findItem(Long id){
+    public Items findItem(Long id){
         return itemJpaRepository.findById(id).get();
     }
 
-    public List<DbEntityItems> findItems(List<Long> ids) {
+    public List<Items> findItems(List<Long> ids) {
         return itemJpaRepository.findAllById(ids);
     }
 }

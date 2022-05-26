@@ -11,10 +11,12 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.csv.order_management.sender.Sender;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.csv.order_management.sender.TelegramSender;
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -30,7 +32,7 @@ class TestMarketApplicationTests {
 	private MockMvc mockMvc;
 
 	@SpyBean
-	private Sender sender;
+	private TelegramSender sender;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -56,7 +58,7 @@ class TestMarketApplicationTests {
 
 		Update update = objectMapper.readValue(jsonRequestBody, Update.class);
 
-		doNothing().when(sender).send(any());
+		doNothing().when(sender).prepareAndSend(any());
 
 
 		mockMvc.perform(
@@ -188,6 +190,11 @@ class TestMarketApplicationTests {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(emptyOrderUpdate)));
 
+	}
+
+	@Test
+	void sdf() throws TelegramApiException {
+//		sender.send(List.of(new DeleteMessage("387340096", 631)));
 	}
 
 }

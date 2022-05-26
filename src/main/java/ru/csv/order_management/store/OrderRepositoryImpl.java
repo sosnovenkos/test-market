@@ -2,7 +2,7 @@ package ru.csv.order_management.store;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.csv.order_management.store.entity.DbEntityOrder;
+import ru.csv.order_management.store.entity.Order;
 
 import java.util.List;
 
@@ -11,19 +11,19 @@ import java.util.List;
 public class OrderRepositoryImpl {
     private final OrderJpaRepository orderJpaRepository;
 
-    public DbEntityOrder saveOrder(DbEntityOrder order) {
+    public Order saveOrder(Order order) {
         return orderJpaRepository.save(order);
     }
 
-    public DbEntityOrder findById(Long id) {
+    public Order findById(Long id) {
         return orderJpaRepository.findById(id).get();
     }
 
-    public List<DbEntityOrder> findAllByUserId(Long userId) {
+    public List<Order> findAllByUserId(Long userId) {
         return orderJpaRepository.findAllByUserId(userId);
     }
 
-    public DbEntityOrder findOrderInCartStatus(Long userId) {
+    public Order findOrderInCartStatus(Long userId) {
         return orderJpaRepository.findByStatusAndUserId("cart", userId);
     }
 }

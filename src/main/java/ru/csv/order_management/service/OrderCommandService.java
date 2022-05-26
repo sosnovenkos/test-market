@@ -1,207 +1,222 @@
 package ru.csv.order_management.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.csv.order_management.domain.command.*;
-import ru.csv.order_management.sender.Sender;
-import ru.csv.order_management.store.ActionRepositoryImpl;
-import ru.csv.order_management.store.AddressRepositoryImpl;
-import ru.csv.order_management.store.ItemRepositoryImpl;
-import ru.csv.order_management.store.OrderRepositoryImpl;
-import ru.csv.order_management.store.entity.DbEntityAction;
-import ru.csv.order_management.store.entity.DbEntityAddress;
-import ru.csv.order_management.store.entity.DbEntityItems;
-import ru.csv.order_management.store.entity.DbEntityOrder;
+import ru.csv.order_management.domain.context.*;
+import ru.csv.order_management.store.*;
+import ru.csv.order_management.store.entity.*;
 
-import java.time.DateTimeException;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-
-//import static org.graalvm.compiler.phases.util.GraphOrder.createOrder;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class OrderCommandService {
-    private final ObjectMapper mapper;
     private final Sender sender;
-    private final OrderRepositoryImpl orderRepository;
     private final ItemRepositoryImpl itemRepository;
+    private final OrderRepositoryImpl orderRepository;
     private final AddressRepositoryImpl addressRepository;
-    private final MessageFactory messageFactory;
     private final ActionRepositoryImpl actionRepositoryImpl;
+    private final MessageToBeDeletedRepositoryImpl messageToBeDeletedRepository;
 
-    @Value("${bot.admin.chat-ids}")
-    private List<String> adminChatIds;
+    private static final List<String> NOT_DELETED_MESSAGES = List.of("Воспользуйтесь меню.");
+    private static final List<String> TEMP_NOT_DELETED_MESSAGES = List.of("Нажимайте на позиции, чтобы ДОБАВИТЬ их в корзину");
 
-    public void handle(Command command) throws TelegramApiException {
-        if (command instanceof StartCommand) handleStartCommand((StartCommand)command);
-        if (command instanceof PriceCommand) handlePriceCommand((PriceCommand)command);
-        if (command instanceof FindChildCommand) handleFindChildCommand((FindChildCommand)command);
-        if (command instanceof AddItemCommand) handleAddItemCommand((AddItemCommand)command);
-        if (command instanceof DelItemCommand) handleDelItemCommand((DelItemCommand)command);
-        if (command instanceof GetItemInfoCommand) handleGetInfoCommand((GetItemInfoCommand)command);
-        if (command instanceof BasketCommand) handleBasketCommand((BasketCommand)command);
-        if (command instanceof CheckoutCommand) handleCheckoutCommand((CheckoutCommand)command);
-//        if (command instanceof ActionHistoryCommand) handleActionHistoryCommand((ActionHistoryCommand)command);
-        if (command instanceof OrderHistoryCommand) handleOrderHistoryCommand((OrderHistoryCommand)command);
-        if (command instanceof AddAddressCommand) handleAddAddressCommand((AddAddressCommand)command);
-        if (command instanceof WaitingForActionCommand) handleWaitingForActionCommand((WaitingForActionCommand)command);
-        if (command instanceof SetAddressCommand) handleSetAddressCommand((SetAddressCommand)command);
+    public void handle(Command command) {
+        command.handle(this);
     }
 
-    public void handleStartCommand(StartCommand command) throws TelegramApiException {
-        var messages = new ArrayList<>(List.of(messageFactory.createReplyToStartCommand(command)));
-        adminChatIds.forEach(id -> messages.add(new SendMessage(id, "Дана команда .start от @" + command.userName)));
-        sender.sendList(messages);
+    public void handle(StartCommand command) {
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(StartCommandContext.builder().command(command).build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
-    public void handlePriceCommand(PriceCommand command) throws TelegramApiException {
+    public void handle(PriceCommand command) {
         var items = itemRepository.findHeadGroup();
-        var message = messageFactory.createMessageForGroupList(command, items);
-        sender.sendList(message);
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(PriceCommandContext.builder().command(command).items(items).build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
-    public void handleFindChildCommand(FindChildCommand command) throws TelegramApiException {
+    public void handle(FindChildCommand command) {
         var order = orderRepository.findOrderInCartStatus(command.getUserId());
         if (isNull(order)) {
-            order = new DbEntityOrder();
+            order = new Order();
             order.setStatus("cart");
             order.setUserId(command.getUserId());
+            order.setCreatedAt(OffsetDateTime.now());
             orderRepository.saveOrder(order);
         }
         var items = itemRepository.findChildGroup(command.parentId);
-        var message = messageFactory.createMessageForItemsList(command, order, items);
-        sender.sendList(message);
+
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(FindChildCommandContext.builder().command(command).order(order).items(items).build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
-    public void handleAddItemCommand (AddItemCommand addItemCommand) throws TelegramApiException {
-        var order = orderRepository.findOrderInCartStatus(addItemCommand.getUserId());
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(addItemCommand.getChatId());
+    public void handle(AddItemCommand command) {
+        var order = orderRepository.findOrderInCartStatus(command.getUserId());
         if (order != null) {
             if (order.getItems() == null) {
-                order.setItems(List.of(addItemCommand.getItemId()));
+                order.setItems(List.of(command.getItemId()));
             } else {
-                order.getItems().add(addItemCommand.getItemId());
+                order.getItems().add(command.getItemId());
             }
             orderRepository.saveOrder(order);
-            sendMessage.setText("Товар добавлен в заказ");
-        } else {
-            sendMessage.setText("Заказ не создан");
         }
-        sender.send(sendMessage);
+
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(AddItemCommandContext.builder().command(command).order(order).build());
+        var messagesToBeDeletedNow = tempFilter(filter(messageToBeDeletedRepository.findAllByUserId(command.userId)));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
-    public void handleDelItemCommand (DelItemCommand delItemCommand) throws TelegramApiException {
-        var order = orderRepository.findOrderInCartStatus(delItemCommand.getUserId());
-        order.getItems().remove(delItemCommand.getItemId());
+    public void handle(DelItemCommand command) {
+        var order = orderRepository.findOrderInCartStatus(command.getUserId());
+        order.getItems().remove(command.getItemId());
         orderRepository.saveOrder(order);
-        SendMessage sendMessage = new SendMessage(delItemCommand.getChatId(), "Товар удалён из корзины");
-        sender.send(sendMessage);
-        var nextCommand = BasketCommand.builder()
-                .chatId(delItemCommand.getChatId())
-                .userId(delItemCommand.getUserId())
-                .build();
-        handleBasketCommand(nextCommand);
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(DelItemCommandContext.builder().command(command).build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
+
+        handle(BasketCommand.builder()
+                .chatId(command.getChatId())
+                .userId(command.getUserId())
+                .build());
 
     }
 
-    public void handleGetInfoCommand (GetItemInfoCommand getItemInfoCommand) throws TelegramApiException {
-        var item = itemRepository.findItem(Long.valueOf(getItemInfoCommand.getItemId()));
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(getItemInfoCommand.chatId);
-        sendMessage.setText(item.getName() + " " + item.getWeight() + " " + item.getPrice() + " руб.");
-        sender.send(sendMessage);
+    public void handle(GetItemInfoCommand command) {
+        var item = itemRepository.findItem(Long.valueOf(command.getItemId()));
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(GetItemInfoCommandContext.builder()
+                .command(command)
+                .item(item)
+                .build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
-    public void handleBasketCommand (BasketCommand basketCommand) throws TelegramApiException {
+    public void handle(BasketCommand command) {
         log.info("Handle .BasketCommand");
-        var order = orderRepository.findOrderInCartStatus(basketCommand.getUserId());
-        if (order != null && order.getItems() != null && order.getItems().size() > 0){
-            List<DbEntityItems> items = itemRepository.findItems(order.getItems());
-            var amount = items.stream().filter(item -> nonNull(item.getPrice())).mapToLong(DbEntityItems::getPrice).sum();
-            var weight = items.stream().filter(item -> nonNull(item.getPrice())).mapToLong(DbEntityItems::getWeight).sum();
+        var order = orderRepository.findOrderInCartStatus(command.getUserId());
+        List<Items> items = null;
+        if (order != null && order.getItems() != null && order.getItems().size() > 0) {
+            items = itemRepository.findItems(order.getItems());
+            var amount = items.stream().filter(item -> nonNull(item.getPrice())).mapToLong(Items::getPrice).sum();
+            var weight = items.stream().filter(item -> nonNull(item.getPrice())).mapToLong(Items::getWeight).sum();
             order.setAmount(amount);
             order.setWeight(weight);
             orderRepository.saveOrder(order);
-            var message = messageFactory.createMessageForBasket(basketCommand, items, order);
-            sender.sendList(message);
-        } else {
-            SendMessage message = new SendMessage(basketCommand.getChatId(), " Ваша корзина пуста");
-            sender.send(message);
         }
+
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(BasketCommandContext.builder()
+                .command(command)
+                .items(items)
+                .order(order)
+                .build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);;
     }
 
-    public void handleCheckoutCommand (CheckoutCommand checkoutCommand) throws TelegramApiException {
-        var order = orderRepository.findOrderInCartStatus(checkoutCommand.getUserId());
-        var addresses = addressRepository.findByUserId(checkoutCommand.getUserId());
-        var messages = messageFactory.createMessageForOrdering(checkoutCommand, addresses, order);
-        adminChatIds.forEach(id -> messages.add(new SendMessage(id, "Пытался оформить заказ @" + checkoutCommand.userName)));
-        sender.sendList(messages);
+    public void handle (CheckoutCommand command) {
+        var order = orderRepository.findOrderInCartStatus(command.getUserId());
+        var addresses = addressRepository.findByUserId(command.getUserId());
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(CheckoutCommandContext.builder()
+                .command(command)
+                .order(order)
+                .addresses(addresses)
+                .build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
-    public void handleOrderHistoryCommand(OrderHistoryCommand command) throws TelegramApiException {
+    public void handle(OrderHistoryCommand command) {
         var orders = orderRepository.findAllByUserId(command.userId);
-        var messages = new ArrayList<SendMessage>();
-        if (orders == null || orders.isEmpty()) {
-            messages.add(new SendMessage(command.getChatId(), "У вас пока нет истории заказов"));
-        } else {
-            var dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-            messages.add(new SendMessage(command.getChatId(), "Ваши заказы:"));
-            orders.forEach( order -> messages.add(new SendMessage(command.getChatId(), ". Заказ " + order.getId() +
-                    " от " + order.getCreatedAt().format(dateTimeFormatter) + " на " + order.getAmount() +
-                    " руб, " + order.getWeight()/1000.0 + " кг"))
-            );
-        }
-        sender.sendList(messages);
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(OrderHistoryCommandContext.builder()
+                .command(command)
+                .orders(orders)
+                .build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
-    public void handleAddAddressCommand(AddAddressCommand command) throws TelegramApiException {
-        var action = new DbEntityAction();
+    public void handle(AddAddressCommand command) {
+        var action = new Action();
         action.setUserId(command.userId);
         action.setWaitingForAction(true);
         action.setData("address");
         actionRepositoryImpl.save(action);
-        sender.send(new SendMessage(command.getChatId(), "Введите адрес в формате ГОРОД УЛИЦА ДОМ КВАРТИРА, например \"Железнодорожный Пролетарская 2 35\""));
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(AddAddressCommandContext.builder()
+                .command(command)
+                .text("Введите адрес в формате ГОРОД УЛИЦА ДОМ КВАРТИРА, например \"Железнодорожный Пролетарская 2 35\"")
+                .build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
-    public void handleWaitingForActionCommand(WaitingForActionCommand command) throws TelegramApiException {
+    public void handle(WaitingForActionCommand command) {
         var waitingForAction = actionRepositoryImpl.findWaitingForActionByUserId(command.userId);
+        String text = "";
         if (Objects.equals(waitingForAction.getData(), "address")) {
-            var address = new DbEntityAddress();
+            var address = new Address();
             address.setUserId(command.userId);
             address.setDescription(command.text);
             addressRepository.save(address);
             waitingForAction.setData("phone");
             actionRepositoryImpl.save(waitingForAction);
-            sender.send(new SendMessage(command.getChatId(), "Введите номер телефона получателя:"));
+            text = "Введите номер телефона получателя:";
         } else if (Objects.equals(waitingForAction.getData(), "phone")) {
             var address = addressRepository.findByUserId(command.userId).stream()
                     .filter(it -> isNull(it.getPhone()))
                     .findFirst()
-                    .orElse(new DbEntityAddress());
+                    .orElse(new Address());
             address.setPhone(command.text);
             addressRepository.save(address);
             waitingForAction.setWaitingForAction(false);
             waitingForAction.setData(null);
             actionRepositoryImpl.save(waitingForAction);
-            sender.send(new SendMessage(command.getChatId(), "Адрес добавлен. Нажмите Оформить заказ."));
+            text = "Адрес добавлен. Нажмите Оформить заказ.";
         }
+
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(WaitingForActionCommandContext.builder()
+                .command(command)
+                .text(text)
+                .build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
     }
 
-    public void handleSetAddressCommand(SetAddressCommand command) throws TelegramApiException {
+    public void handle(SetAddressCommand command) {
         var order = orderRepository.findById(command.orderId);
         order.setAddressId(command.addressId);
         order.setStatus("delivery");
@@ -209,21 +224,24 @@ public class OrderCommandService {
         orderRepository.saveOrder(order);
         var items = itemRepository.findItems(order.getItems());
         var address = addressRepository.findById(command.addressId);
-        var messages = new ArrayList<>(List.of(new SendMessage(command.getChatId(), "Спасибо за заказ. " +
-                "В ближайшее время мы свяжемся с вами для уточнения деталей доставки.")));
-        adminChatIds.forEach(id -> {
-            messages.add(new SendMessage(id, "Поступил заказ (" + order.getWeight() / 1000.0 +
-                    " кг, " + order.getAmount() + " руб.):"));
 
-            items.forEach(item -> messages.add(new SendMessage(id, ". " + item.getName() + " " + item.getWeight() + " гр. " + item.getPrice() + " руб.")));
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(SetAddressCommandContext.builder()
+                .command(command)
+                .order(order)
+                .address(address)
+                .items(items)
+                .build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
+    }
 
-            messages.add(new SendMessage(id, "Доставка по адресу: " + address.getDescription() +
-                    ", звонить для согласования времени доставки: " + address.getPhone()));
-                }
-        );
+    private List<MessageToBeDeleted> filter(List<MessageToBeDeleted> messagesToBeDeletedNow) {
+        return messagesToBeDeletedNow.stream().filter(it -> it.getText() == null || !NOT_DELETED_MESSAGES.contains(it.getText())).collect(Collectors.toList());
+    }
 
-        sender.sendList(messages);
+    private List<MessageToBeDeleted> tempFilter(List<MessageToBeDeleted> messagesToBeDeletedNow) {
+        return messagesToBeDeletedNow.stream().filter(it -> it.getText() == null || !TEMP_NOT_DELETED_MESSAGES.contains(it.getText())).collect(Collectors.toList());
     }
 }
-
-

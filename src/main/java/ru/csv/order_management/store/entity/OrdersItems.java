@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Data
 @Entity
 @Table(name = "orders_items")
-public class DbEntityOrdersItems {
+public class OrdersItems {
     @Id
     @GeneratedValue
     @Column(name = "id", nullable = false)
