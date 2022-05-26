@@ -21,6 +21,8 @@ public enum CommandType {
     ADD_TO_CART_FOR_ENTRY(List.of("ADD_TO_CART_FOR_ENTRY")),
     FIND_CHILD(List.of("FIND_CHILD")),
     DELETE_ITEM(List.of("DELETE", "DEL_ITEM", "delete Item", "Удалить товар")),
+    CHOOSE_DATE(List.of("choose date", "выбрать время")),
+    CHOOSE_TIME(List.of("CHOOSE_TIME")),
     UNKNOWN(List.of());
 
     private final List<String> title;
