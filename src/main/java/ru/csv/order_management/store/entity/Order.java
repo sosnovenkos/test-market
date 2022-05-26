@@ -31,6 +31,15 @@ public class Order {
     @Type(type = "jsonb")
     private List<Long> items;
 
+    @Column(name = "timeslot_id")
+    private long timeslotId;
+
+    @Column(name = "date")
+    private String date;
+
+    @Column(name = "time")
+    private String time;
+
     @Column(name = "status")
     private String status;
 
