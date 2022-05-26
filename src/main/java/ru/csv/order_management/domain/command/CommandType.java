@@ -18,6 +18,7 @@ public enum CommandType {
     VIEW_ORDERS(List.of("view orders", "Посмотреть заказы")),
     GET_ITEM_INFO(List.of("GET_INFO")),
     ADD_TO_CART(List.of("ADD_TO_CART")),
+    ADD_TO_CART_FOR_ENTRY(List.of("ADD_TO_CART_FOR_ENTRY")),
     FIND_CHILD(List.of("FIND_CHILD")),
     DELETE_ITEM(List.of("DELETE", "DEL_ITEM", "delete Item", "Удалить товар")),
     UNKNOWN(List.of());
