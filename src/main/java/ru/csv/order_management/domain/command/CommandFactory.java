@@ -61,6 +61,7 @@ public class CommandFactory {
                 return AddItemCommandForEntry.builder()
                         .userId(update.getCallbackQuery().getFrom().getId())
                         .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
+                        .timeslotId(Long.valueOf(update.getCallbackQuery().getData().split(DELIMITER)[3]))
                         .date(update.getCallbackQuery().getData().split(DELIMITER)[1])
                         .time(update.getCallbackQuery().getData().split(DELIMITER)[2])
                         .build();

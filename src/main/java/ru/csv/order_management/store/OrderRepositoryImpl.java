@@ -40,4 +40,12 @@ public class OrderRepositoryImpl {
     public DbEntityOrder findOrderInCartStatus(Long userId) {
         return orderJpaRepository.findByStatusAndUserId("cart", userId);
     }
+
+    public List<DbEntityOrder> findDate(String date){
+        return orderJpaRepository.findByDate(date);
+    }
+
+    public DbEntityOrder findTime(String time){
+        return  orderJpaRepository.findByTime(time);
+    }
 }

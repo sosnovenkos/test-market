@@ -16,6 +16,6 @@ public class ChooseTimeCommand implements Command{
 
     @Override
     public Long getId() {
-        return null;
+        return userId;
     }
 }

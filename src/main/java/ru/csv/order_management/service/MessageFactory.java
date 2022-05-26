@@ -18,8 +18,10 @@ import ru.csv.order_management.store.entity.DbEntityTimeslot;
 import wiremock.com.github.jknack.handlebars.internal.antlr.misc.Interval;
 
 import java.time.OffsetDateTime;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @Service
@@ -87,9 +89,11 @@ public class MessageFactory {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
-                    date.plusDays(i+1).getDayOfWeek().toString()
+                    date.plusDays(i+1).getDayOfWeek().getDisplayName(TextStyle.FULL,
+                            Locale.getDefault())
                             + " " + date.plusDays(i+1).getDayOfMonth()
-                            + " " + date.plusDays(i+1).getMonth()
+                            + " " + date.plusDays(i+1).getMonth().getDisplayName(TextStyle.FULL,
+                            Locale.getDefault())
                             + " " + date.plusDays(i+1).getYear()
             );
             var cbd = "CHOOSE_TIME:" + date.plusDays(i+1).toInstant().toEpochMilli() + ":" + date.plusDays(i+1).getDayOfWeek().getValue();
@@ -115,18 +119,12 @@ public class MessageFactory {
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-//        List<String> timeslots = new ArrayList<>();
-//        timeslots.add("9-00 - 10-00");
-//        timeslots.add("10-00 - 11-00");
-//        timeslots.add("11-00 - 12-00");
-//        timeslots.add("12-00 - 13-00");
-//        timeslots.add("13-00 - 14-00");
         for (int i = 0; i < timeslots.size(); i++) {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
                     timeslots.get(i).getTimeslot()
             );
-            var cbd = "ADD_TO_CART_FOR_ENTRY:" + command.getDate().toString().split(":")[0] + ":" + timeslots.get(i).getTimeslot();
-            log.info("ADD_TO_CART_FOR_ENTRY:" + command.getDate().toString().split(":")[0] + ":" + timeslots.get(i).getTimeslot());
+            var cbd = "ADD_TO_CART_FOR_ENTRY:" + command.getDate().toString().split("T")[0] + ":" + timeslots.get(i).getTimeslot() + ":" + timeslots.get(i).getId();
+            log.info("ADD_TO_CART_FOR_ENTRY:" + command.getDate().toString().split("T")[0] + ":" + timeslots.get(i).getTimeslot() + ":" + timeslots.get(i).getId());
 
             inlineKeyboardButton.setCallbackData(cbd);
             inlineKeyboardButton.getSwitchInlineQuery();

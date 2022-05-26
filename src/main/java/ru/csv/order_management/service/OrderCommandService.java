@@ -17,10 +17,12 @@ import ru.csv.order_management.store.OrderRepositoryImpl;
 import ru.csv.order_management.store.TimeslotRepositoryImpl;
 import ru.csv.order_management.store.entity.DbEntityItems;
 import ru.csv.order_management.store.entity.DbEntityOrder;
+import ru.csv.order_management.store.entity.DbEntityTimeslot;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
@@ -44,10 +46,10 @@ public class OrderCommandService {
         if (command instanceof StartCommand) handleStartCommand((StartCommand)command);
         if (command instanceof PriceCommand) handlePriceCommand((PriceCommand)command);
         if (command instanceof FindChildCommand) handleFindChildCommand((FindChildCommand)command);
-//        if (command instanceof AddItemCommand) handleAddItemCommand((AddItemCommand)command);
-//        if (command instanceof DelItemCommand) handleDelItemCommand((DelItemCommand)command);
+        if (command instanceof AddItemCommand) handleAddItemCommand((AddItemCommand)command);
+        if (command instanceof DelItemCommand) handleDelItemCommand((DelItemCommand)command);
         if (command instanceof GetItemInfoCommand) handleGetInfoCommand((GetItemInfoCommand)command);
-//        if (command instanceof BasketCommand) handleBasketCommand((BasketCommand)command);
+        if (command instanceof BasketCommand) handleBasketCommand((BasketCommand)command);
         if (command instanceof CheckoutCommand) handleCheckoutCommand((CheckoutCommand)command);
         if (command instanceof ActionHistoryCommand) handleActionHistoryCommand((ActionHistoryCommand)command);
         if (command instanceof OrderHistoryCommand) handleOrderHistoryCommand((OrderHistoryCommand)command);
@@ -81,10 +83,22 @@ public class OrderCommandService {
     public void handleChooseTimeCommand(ChooseTimeCommand command) throws TelegramApiException {
         log.info("ChooseTime");
         var x = OffsetDateTime.now();
-        log.info(String.valueOf(x.getDayOfWeek().getValue()));
-        var timeslots = timeslotRepository.findChildGroup(command.parentId);
-        var message = messageFactory.createMessageForChooseTime(command, timeslots);
-        sender.sendList(message);
+        var timeslotsAll = timeslotRepository.findChildGroup(command.parentId);
+        var date = command.getDate().toString().split("T")[0];
+        var findDates = orderRepository.findDate(date);
+        if (findDates.size() != 0) {
+            List<DbEntityTimeslot> timeslotsFind = new ArrayList<>();
+            for (int i = 0; i < findDates.size(); i++) {
+                DbEntityTimeslot timeslotFind = new DbEntityTimeslot();
+                timeslotFind.setTimeslot(findDates.get(i).getTime());
+                timeslotFind.setId(findDates.get(i).getTimeslotId());
+                timeslotFind.setParentId(command.parentId);
+                timeslotsFind.add(timeslotFind);
+            }
+            timeslotsAll.removeAll(timeslotsFind);
+        }
+            var message = messageFactory.createMessageForChooseTime(command, timeslotsAll);
+            sender.sendList(message);
     }
 
     public void handleFindChildCommand(FindChildCommand command) throws TelegramApiException {
@@ -100,56 +114,56 @@ public class OrderCommandService {
         sender.sendList(message);
     }
 
-//    public void handleAddItemCommand (AddItemCommand addItemCommand) throws TelegramApiException {
-//        var order = orderRepository.findOrderInCartStatus(addItemCommand.getUserId());
-//        SendMessage sendMessage = new SendMessage();
-//        sendMessage.setChatId(addItemCommand.getChatId());
-//        if (order != null) {
-//            if (order.getItems() == null) {
-//                order.setItems(List.of(addItemCommand.getItemId()));
-//            } else {
-//                order.getItems().add(addItemCommand.getItemId());
-//            }
-//            orderRepository.saveOrder(order);
-//            sendMessage.setText("Товар добавлен в заказ");
-//        } else {
-//            sendMessage.setText("Заказ не создан");
-//        }
-//        sender.send(sendMessage);
-//    }
+    public void handleAddItemCommand (AddItemCommand addItemCommand) throws TelegramApiException {
+        var order = orderRepository.findOrderInCartStatus(addItemCommand.getUserId());
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(addItemCommand.getChatId());
+        if (order != null) {
+            if (order.getItems() == null) {
+                order.setItems(List.of(addItemCommand.getItemId()));
+            } else {
+                order.getItems().add(addItemCommand.getItemId());
+            }
+            orderRepository.saveOrder(order);
+            sendMessage.setText("Товар добавлен в заказ");
+        } else {
+            sendMessage.setText("Заказ не создан");
+        }
+        sender.send(sendMessage);
+    }
 
     public void handleAddItemCommandForEntry (AddItemCommandForEntry addItemCommandToEntry) throws TelegramApiException {
         log.info("addItemCommandToEntry: " + addItemCommandToEntry.toString());
         var order = orderRepository.findOrderInCartStatus(addItemCommandToEntry.getUserId());
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(addItemCommandToEntry.chatId);
-        if (order != null) {
-            if (order.getItems() == null) {
-                order.setItems(List.of(addItemCommandToEntry.getDate() + addItemCommandToEntry.getTime()));
-            } else {
-                order.getItems().add(addItemCommandToEntry.getDate() + addItemCommandToEntry.getTime());
-            }
+        if (order == null) {
+            order = new DbEntityOrder();
+            order.setUserId(addItemCommandToEntry.getUserId());
+                order.setDate(addItemCommandToEntry.getDate());
+                order.setTime(addItemCommandToEntry.getTime());
+                order.setTimeslotId(addItemCommandToEntry.getTimeslotId());
             orderRepository.saveOrder(order);
             sendMessage.setText("Вы успешно записаны");
         } else {
-            sendMessage.setText("Попробуйте ещё раз");
+            sendMessage.setText("Запись уже существует");
         }
         sender.send(sendMessage);
     }
 
-//    public void handleDelItemCommand (DelItemCommand delItemCommand) throws TelegramApiException {
-//        var order = orderRepository.findOrderInCartStatus(Long.valueOf(delItemCommand.getUserId()));
-//        order.getItems().remove(delItemCommand.getItemId());
-//        orderRepository.saveOrder(order);
-//        SendMessage sendMessage = new SendMessage(delItemCommand.getChatId(), "Товар удалён из корзины");
-//        sender.send(sendMessage);
-//        var nextCommand = BasketCommand.builder()
-//                .chatId(delItemCommand.getChatId())
-//                .userId(delItemCommand.getUserId())
-//                .build();
-//        handleBasketCommand(nextCommand);
-//
-//    }
+    public void handleDelItemCommand (DelItemCommand delItemCommand) throws TelegramApiException {
+        var order = orderRepository.findOrderInCartStatus(Long.valueOf(delItemCommand.getUserId()));
+        order.getItems().remove(delItemCommand.getItemId());
+        orderRepository.saveOrder(order);
+        SendMessage sendMessage = new SendMessage(delItemCommand.getChatId(), "Товар удалён из корзины");
+        sender.send(sendMessage);
+        var nextCommand = BasketCommand.builder()
+                .chatId(delItemCommand.getChatId())
+                .userId(delItemCommand.getUserId())
+                .build();
+        handleBasketCommand(nextCommand);
+
+    }
 
     public void handleGetInfoCommand (GetItemInfoCommand getItemInfoCommand) throws TelegramApiException {
         var item = itemRepository.findItem(Long.valueOf(getItemInfoCommand.getItemId()));
@@ -159,21 +173,21 @@ public class OrderCommandService {
         sender.send(sendMessage);
     }
 
-//    public void handleBasketCommand (BasketCommand basketCommand) throws TelegramApiException {
-//        var order = orderRepository.findOrderInCartStatus(Long.valueOf(basketCommand.getUserId()));
-//        if (order != null && order.getItems() != null && order.getItems().size() > 0){
-//            List<DbEntityItems> items = new ArrayList<>();
-//            for (Long i: order.getItems()) {
-//                items.add(itemRepository.findItem(i));
-//            }
-//            var message = messageFactory.createMessageForBasket(basketCommand, items);
-//            log.info("List<DbEntityItems> items " + items.size());
-//            sender.sendList(message);
-//        } else {
-//            SendMessage message = new SendMessage(basketCommand.getChatId(), " Ваша корзина пуста");
-//            sender.send(message);
-//        }
-//    }
+    public void handleBasketCommand (BasketCommand basketCommand) throws TelegramApiException {
+        var order = orderRepository.findOrderInCartStatus(Long.valueOf(basketCommand.getUserId()));
+        if (order != null && order.getItems() != null && order.getItems().size() > 0){
+            List<DbEntityItems> items = new ArrayList<>();
+            for (Long i: order.getItems()) {
+                items.add(itemRepository.findItem(i));
+            }
+            var message = messageFactory.createMessageForBasket(basketCommand, items);
+            log.info("List<DbEntityItems> items " + items.size());
+            sender.sendList(message);
+        } else {
+            SendMessage message = new SendMessage(basketCommand.getChatId(), " Ваша корзина пуста");
+            sender.send(message);
+        }
+    }
 
     public void handleCheckoutCommand (CheckoutCommand checkoutCommand) throws TelegramApiException {
         var order = orderRepository.findOrderInCartStatus(Long.valueOf(checkoutCommand.getUserId()));

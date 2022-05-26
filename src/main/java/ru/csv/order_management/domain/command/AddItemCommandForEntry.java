@@ -10,6 +10,7 @@ import java.time.OffsetDateTime;
 public class AddItemCommandForEntry implements Command{
     public String chatId;
     public Long userId;
+    public Long timeslotId;
     public String date;
     public String time;
 

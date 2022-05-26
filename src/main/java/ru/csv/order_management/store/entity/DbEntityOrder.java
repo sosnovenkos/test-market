@@ -30,8 +30,16 @@ public class DbEntityOrder {
 
     @Column(name = "items")
     @Type(type = "jsonb")
-//    private List<Long> items;
-    private List<String> items;
+    private List<Long> items;
+    
+    @Column(name = "timeslot_id")
+    private Long timeslotId;
+
+    @Column(name = "date")
+    private String date;
+
+    @Column(name = "time")
+    private String time;
 
     @Column(name = "status")
     private String status;

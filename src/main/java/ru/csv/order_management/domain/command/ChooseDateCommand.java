@@ -12,6 +12,6 @@ public class ChooseDateCommand implements Command {
 
     @Override
     public Long getId() {
-        return null;
+        return userId;
     }
 }
