@@ -115,7 +115,9 @@ public class MessageFactory {
         log.info("createMessageForChooseTime");
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(command.chatId);
-        sendMessage.setText("Выберите время");
+        sendMessage.setText(command.getDate().getDayOfWeek().getDisplayName(TextStyle.FULL,
+                Locale.getDefault()) + " " + command.getDate().getDayOfMonth() + " " + command.getDate().getMonth().getDisplayName(TextStyle.FULL,
+                Locale.getDefault()) + "\n" + "Выберите время");
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
