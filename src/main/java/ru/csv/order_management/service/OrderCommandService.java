@@ -6,14 +6,12 @@ import org.springframework.stereotype.Service;
 import ru.csv.order_management.domain.command.*;
 import ru.csv.order_management.domain.context.*;
 import ru.csv.order_management.store.*;
-import ru.csv.order_management.store.entity.Action;
-import ru.csv.order_management.store.entity.Address;
-import ru.csv.order_management.store.entity.Items;
-import ru.csv.order_management.store.entity.Order;
+import ru.csv.order_management.store.entity.*;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -29,13 +27,16 @@ public class OrderCommandService {
     private final ActionRepositoryImpl actionRepositoryImpl;
     private final MessageToBeDeletedRepositoryImpl messageToBeDeletedRepository;
 
+    private static final List<String> NOT_DELETED_MESSAGES = List.of("Воспользуйтесь меню.");
+    private static final List<String> TEMP_NOT_DELETED_MESSAGES = List.of("Нажимайте на позиции, чтобы ДОБАВИТЬ их в корзину");
+
     public void handle(Command command) {
         command.handle(this);
     }
 
     public void handle(StartCommand command) {
         var messagesToBeDeletedNextTime = sender.prepareAndSend(StartCommandContext.builder().command(command).build());
-        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);
@@ -44,7 +45,7 @@ public class OrderCommandService {
     public void handle(PriceCommand command) {
         var items = itemRepository.findHeadGroup();
         var messagesToBeDeletedNextTime = sender.prepareAndSend(PriceCommandContext.builder().command(command).items(items).build());
-        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);
@@ -62,7 +63,7 @@ public class OrderCommandService {
         var items = itemRepository.findChildGroup(command.parentId);
 
         var messagesToBeDeletedNextTime = sender.prepareAndSend(FindChildCommandContext.builder().command(command).order(order).items(items).build());
-        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);
@@ -79,18 +80,11 @@ public class OrderCommandService {
             orderRepository.saveOrder(order);
         }
 
-        var item = itemRepository.findItem(command.itemId);
         var messagesToBeDeletedNextTime = sender.prepareAndSend(AddItemCommandContext.builder().command(command).order(order).build());
-        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        var messagesToBeDeletedNow = tempFilter(filter(messageToBeDeletedRepository.findAllByUserId(command.userId)));
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);
-
-        handle(FindChildCommand.builder()
-                .chatId(command.getChatId())
-                .userId(command.getUserId())
-                .parentId(item.getParentId())
-                .build());
     }
 
     public void handle(DelItemCommand command) {
@@ -98,7 +92,7 @@ public class OrderCommandService {
         order.getItems().remove(command.getItemId());
         orderRepository.saveOrder(order);
         var messagesToBeDeletedNextTime = sender.prepareAndSend(DelItemCommandContext.builder().command(command).build());
-        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);
@@ -116,7 +110,7 @@ public class OrderCommandService {
                 .command(command)
                 .item(item)
                 .build());
-        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);
@@ -140,7 +134,7 @@ public class OrderCommandService {
                 .items(items)
                 .order(order)
                 .build());
-        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);;
@@ -154,7 +148,7 @@ public class OrderCommandService {
                 .order(order)
                 .addresses(addresses)
                 .build());
-        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);
@@ -166,7 +160,7 @@ public class OrderCommandService {
                 .command(command)
                 .orders(orders)
                 .build());
-        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);
@@ -182,7 +176,7 @@ public class OrderCommandService {
                 .command(command)
                 .text("Введите адрес в формате ГОРОД УЛИЦА ДОМ КВАРТИРА, например \"Железнодорожный Пролетарская 2 35\"")
                 .build());
-        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);
@@ -216,7 +210,7 @@ public class OrderCommandService {
                 .command(command)
                 .text(text)
                 .build());
-        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);
@@ -237,9 +231,17 @@ public class OrderCommandService {
                 .address(address)
                 .items(items)
                 .build());
-        var messagesToBeDeletedNow = messageToBeDeletedRepository.findAllByUserId(command.userId);
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
         messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
         messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
         sender.delete(messagesToBeDeletedNow);
+    }
+
+    private List<MessageToBeDeleted> filter(List<MessageToBeDeleted> messagesToBeDeletedNow) {
+        return messagesToBeDeletedNow.stream().filter(it -> it.getText() == null || !NOT_DELETED_MESSAGES.contains(it.getText())).collect(Collectors.toList());
+    }
+
+    private List<MessageToBeDeleted> tempFilter(List<MessageToBeDeleted> messagesToBeDeletedNow) {
+        return messagesToBeDeletedNow.stream().filter(it -> it.getText() == null || !TEMP_NOT_DELETED_MESSAGES.contains(it.getText())).collect(Collectors.toList());
     }
 }

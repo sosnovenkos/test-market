@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.csv.order_management.domain.context.Context;
+import ru.csv.order_management.domain.context.FindChildCommandContext;
 import ru.csv.order_management.domain.context.StartCommandContext;
 import ru.csv.order_management.service.Sender;
 import ru.csv.order_management.store.entity.MessageToBeDeleted;
@@ -26,8 +27,6 @@ import java.util.List;
 public class TelegramSender extends DefaultAbsSender implements Sender {
     @Value("${bot.token}")
     private String token;
-
-    private static final List<String> NOT_DELETED_MESSAGES = List.of("Воспользуйтесь меню.");
 
     @Autowired
     private MessageFactory messageFactory;
@@ -82,15 +81,13 @@ public class TelegramSender extends DefaultAbsSender implements Sender {
 //        if (context instanceof StartCommandContext) return messagesToBeDeleted;
 
         for (Message telegramMessage : telegramMessages) {
-            if (NOT_DELETED_MESSAGES.contains(telegramMessage.getText())) continue;
             var messageToBeDeleted = new MessageToBeDeleted();
             messageToBeDeleted.setUserId(context.getUserId());
             messageToBeDeleted.setChatId(telegramMessage.getChatId());
             messageToBeDeleted.setMessageId(telegramMessage.getMessageId());
+            messageToBeDeleted.setText(telegramMessage.getText());
             messagesToBeDeleted.add(messageToBeDeleted);
         }
-
-
 
         return messagesToBeDeleted;
     }

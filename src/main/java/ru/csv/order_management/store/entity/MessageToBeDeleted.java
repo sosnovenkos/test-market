@@ -22,4 +22,7 @@ public class MessageToBeDeleted {
 
     @Column(name = "message_id")
     private Integer messageId;
+
+    @Column(name = "text")
+    private String text;
 }
