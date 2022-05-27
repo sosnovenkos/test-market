@@ -49,6 +49,7 @@ public class CommandFactory {
                     return ChooseDateCommand.builder()
                             .userId(update.getMessage().getFrom().getId())
                             .chatId(update.getMessage().getChatId().toString())
+                            .messageId(update.getMessage().getMessageId())
                             .build();
                 default:
                     return WaitingForActionCommand.builder()
@@ -101,6 +102,12 @@ public class CommandFactory {
                             .userId(update.getCallbackQuery().getFrom().getId())
                             .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
 //                            .messageId(update.getCallbackQuery().getMessage().getMessageId())
+                            .build();
+                case CHOOSE_DATE:
+                    return ChooseDateCommand.builder()
+                            .userId(update.getCallbackQuery().getFrom().getId())
+                            .chatId(update.getCallbackQuery().getMessage().getChatId().toString())
+                            .messageId(update.getCallbackQuery().getMessage().getMessageId())
                             .build();
                 case ADD_ADDRESS:
                     return AddAddressCommand.builder()

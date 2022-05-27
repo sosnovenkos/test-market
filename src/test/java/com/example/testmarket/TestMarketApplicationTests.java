@@ -181,7 +181,13 @@ class TestMarketApplicationTests {
 				":1653035293,\"chat\":{\"id\":387340096,\"type\":\"private\",\"first_name\":\"Сергей\",\"username\":" +
 				"\"sosnovenko\"},\"text\":\"Прайс\"}}";
 		Update emptyOrderUpdate = objectMapper.readValue(emptyOrderBody, Update.class);
-		var x = "{\"update_id\":473646854,\"callback_query\":{\"id\":\"1663613048041582930\",\"from\":{\"id\":387340096,\"first_name\":\"Сергей\",\"is_bot\":false,\"username\":\"sosnovenko\",\"language_code\":\"ru\"},\"message\":{\"message_id\":2747,\"from\":{\"id\":5389563438,\"first_name\":\"K&b\",\"is_bot\":true,\"username\":\"Kb19042022Bot\"},\"date\":1653289071,\"chat\":{\"id\":387340096,\"type\":\"private\",\"first_name\":\"Сергей\",\"username\":\"sosnovenko\"},\"text\":\"Выберите раздел\",\"reply_markup\":{\"inline_keyboard\":[[{\"text\":\"ОРЕХИ null null руб.\",\"callback_data\":\"FIND_CHILD::41\"}],[{\"text\":\"СухоФрукты null null руб.\",\"callback_data\":\"FIND_CHILD::42\"}],[{\"text\":\"Цукаты null null руб.\",\"callback_data\":\"FIND_CHILD::43\"}]]}},\"data\":\"FIND_CHILD::41\",\"chat_instance\":\"-5559790698702389123\"}}";
+		var x = "{\"update_id\":473646854,\"callback_query\":{\"id\":\"1663613048041582930\",\"from\":{\"id\":387340096,\"" +
+				"first_name\":\"Сергей\",\"is_bot\":false,\"username\":\"sosnovenko\",\"language_code\":\"ru\"},\"message\"" +
+		":{\"message_id\":2747,\"from\":{\"id\":5389563438,\"first_name\":\"K&b\",\"is_bot\":true,\"username\":\"Kb19042022Bot\"}" +
+				",\"date\":1653289071,\"chat\":{\"id\":387340096,\"type\":\"private\",\"first_name\":\"Сергей\",\"username\":\"sosnovenko\"}" +
+				",\"text\":\"Выберите раздел\",\"reply_markup\":{\"inline_keyboard\":[[{\"text\":\"ОРЕХИ null null руб.\",\"callback_data\":" +
+		"\"FIND_CHILD::41\"}],[{\"text\":\"СухоФрукты null null руб.\",\"callback_data\":\"FIND_CHILD::42\"}],[{\"text\":\"Цукаты null null руб.\"," +
+		"\"callback_data\":\"FIND_CHILD::43\"}]]}},\"data\":\"FIND_CHILD::41\",\"chat_instance\":\"-5559790698702389123\"}}";
 
 //		doNothing().when(sender).send(any());
 

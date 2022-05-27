@@ -27,7 +27,7 @@ import java.util.Locale;
 @Service
 @AllArgsConstructor
 public class MessageFactory {
-    private final List<String> PRODUCT_CODE_AS_BACK = List.of("14", "15", "16");
+    private final List<String> PRODUCT_CODE_AS_BACK = List.of("14", "15", "16", "19", "20", "21", "22", "23", "24", "25");
 
 //    @Value("${bot.admin.chat-ids}")
     private List<String> adminChatIds;
@@ -300,11 +300,9 @@ public class MessageFactory {
         return sendMessageList;
     }
 
-
     public List<SendMessage> createMessages(ChooseTimeCommandContext context){
         log.info("createMessageForChooseTime");
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setText("Выберите время");
         sendMessage.setChatId(context.command.chatId);
         sendMessage.setText(context.command.getDate().getDayOfWeek().getDisplayName(TextStyle.FULL,
                 Locale.getDefault()) + " " + context.command.getDate().getDayOfMonth() + " " + context.command.getDate().getMonth().getDisplayName(TextStyle.FULL,
@@ -313,17 +311,23 @@ public class MessageFactory {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         for (int i = 0; i < context.timeslots.size(); i++) {
-            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
-                    context.timeslots.get(i).getTimeslot()
-            );
-            var cbd = "ADD_TO_CART_FOR_ENTRY:" + context.command.getDate().toString().split("T")[0] + ":" + context.timeslots.get(i).getTimeslot() + ":" + context.timeslots.get(i).getId();
-            log.info("ADD_TO_CART_FOR_ENTRY:" + context.command.getDate().toString().split("T")[0] + ":" + context.timeslots.get(i).getTimeslot() + ":" + context.timeslots.get(i).getId());
-
-            inlineKeyboardButton.setCallbackData(cbd);
-            inlineKeyboardButton.getSwitchInlineQuery();
-            List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
-            keyboardButtonsRow1.add(inlineKeyboardButton);
-            rowList.add(keyboardButtonsRow1);
+            String callbackData;
+            InlineKeyboardButton inlineKeyboardButton;
+            if (PRODUCT_CODE_AS_BACK.contains(String.valueOf(context.timeslots.get(i).getId()))) {
+                inlineKeyboardButton = new InlineKeyboardButton(context.timeslots.get(i).getTimeslot());
+                callbackData = "choose date:";
+            } else {
+                inlineKeyboardButton = new InlineKeyboardButton(
+                        context.timeslots.get(i).getTimeslot()
+                );
+                callbackData = "ADD_TO_CART_FOR_ENTRY:" + context.command.getDate().toString().split("T")[0] + ":" + context.timeslots.get(i).getTimeslot() + ":" + context.timeslots.get(i).getId();
+                log.info("ADD_TO_CART_FOR_ENTRY:" + context.command.getDate().toString().split("T")[0] + ":" + context.timeslots.get(i).getTimeslot() + ":" + context.timeslots.get(i).getId());
+            }
+                inlineKeyboardButton.setCallbackData(callbackData);
+                inlineKeyboardButton.getSwitchInlineQuery();
+                List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+                keyboardButtonsRow1.add(inlineKeyboardButton);
+                rowList.add(keyboardButtonsRow1);
         }
         inlineKeyboardMarkup.setKeyboard(rowList);
         sendMessage.setReplyMarkup(inlineKeyboardMarkup);
