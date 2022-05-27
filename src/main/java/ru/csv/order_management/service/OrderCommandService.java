@@ -241,16 +241,16 @@ public class OrderCommandService {
         sender.delete(messagesToBeDeletedNow);
     }
 
-    public void handleChooseDateCommand(ChooseDateCommand command) throws TelegramApiException {
+    public void handle(ChooseDateCommand command) throws TelegramApiException {
         log.info("ChooseDate");
         var x = OffsetDateTime.now().plusDays(1).getDayOfWeek().toString();
         var y = OffsetDateTime.now().plusDays(1).getDayOfMonth();
-        var message = messageFactory.createMessageForChooseDate(command, OffsetDateTime.now());
+        var message = messageFactory.createMessage(command, OffsetDateTime.now());
         sender.sendList(message);
         log.info(x + y);
     }
 
-    public void handleChooseTimeCommand(ChooseTimeCommand command) throws TelegramApiException {
+    public void handle(ChooseTimeCommand command) throws TelegramApiException {
         log.info("ChooseTime");
         var x = OffsetDateTime.now();
         var timeslotsAll = timeslotRepository.findChildGroup(command.parentId);
@@ -271,7 +271,7 @@ public class OrderCommandService {
         sender.sendList(message);
     }
 
-    public void handleAddItemCommandForEntry (AddItemCommandForEntry addItemCommandToEntry) throws TelegramApiException {
+    public void handle (AddItemCommandForEntry addItemCommandToEntry) throws TelegramApiException {
         log.info("addItemCommandToEntry: " + addItemCommandToEntry.toString());
         var order = orderRepository.findOrderInCartStatus(addItemCommandToEntry.getUserId());
         SendMessage sendMessage = new SendMessage();

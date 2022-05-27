@@ -26,4 +26,12 @@ public class OrderRepositoryImpl {
     public Order findOrderInCartStatus(Long userId) {
         return orderJpaRepository.findByStatusAndUserId("cart", userId);
     }
+
+    public List<Order> findDate(String date){
+        return orderJpaRepository.findByDate(date);
+    }
+
+    public Order findTime(String time){
+        return  orderJpaRepository.findByTime(time);
+    }
 }

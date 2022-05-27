@@ -10,4 +10,8 @@ public interface OrderJpaRepository extends JpaRepository<Order, Long> {
     Order findByStatusAndUserId(String status, Long userId);
 
     List<Order> findAllByUserId(Long userId);
+
+    List<Order> findByDate(String date);
+
+    Order findByTime(String time);
 }

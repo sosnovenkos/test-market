@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import ru.csv.order_management.domain.command.ChooseDateCommand;
 import ru.csv.order_management.domain.command.ChooseTimeCommand;
 import ru.csv.order_management.domain.context.*;
+import ru.csv.order_management.store.entity.Timeslot;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -264,7 +265,7 @@ public class MessageFactory {
                 .build());
     }
 
-    public List<SendMessage> createMessageForChooseDate(ChooseDateCommand command, OffsetDateTime date){
+    public List<SendMessage> createMessage(ChooseDateCommand command, OffsetDateTime date){
         log.info("createMessageForChooseDate");
         SendMessage sendMessage = new SendMessage();
 
@@ -297,7 +298,7 @@ public class MessageFactory {
         return sendMessageList;
     }
 
-    public List<SendMessage> createMessageForChooseTime(ChooseTimeCommand command, List<DbEntityTimeslot> timeslots){
+    public List<SendMessage> createMessageForChooseTime(ChooseTimeCommand command, List<Timeslot> timeslots){
         log.info("createMessageForChooseTime");
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(command.chatId);
