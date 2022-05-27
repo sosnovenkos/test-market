@@ -29,6 +29,7 @@ public class OrderCommandService {
     private final AddressRepositoryImpl addressRepository;
     private final ActionRepositoryImpl actionRepositoryImpl;
     private final MessageToBeDeletedRepositoryImpl messageToBeDeletedRepository;
+    private final TimeslotRepositoryImpl timeslotRepository;
 
     private static final List<String> NOT_DELETED_MESSAGES = List.of("Воспользуйтесь меню.");
     private static final List<String> TEMP_NOT_DELETED_MESSAGES = List.of("Нажимайте на позиции, чтобы ДОБАВИТЬ их в корзину");
@@ -256,9 +257,9 @@ public class OrderCommandService {
         var date = command.getDate().toString().split("T")[0];
         var findDates = orderRepository.findDate(date);
         if (findDates.size() != 0) {
-            List<DbEntityTimeslot> timeslotsFind = new ArrayList<>();
+            List<Timeslot> timeslotsFind = new ArrayList<>();
             for (int i = 0; i < findDates.size(); i++) {
-                DbEntityTimeslot timeslotFind = new DbEntityTimeslot();
+                Timeslot timeslotFind = new Timeslot();
                 timeslotFind.setTimeslot(findDates.get(i).getTime());
                 timeslotFind.setId(findDates.get(i).getTimeslotId());
                 timeslotFind.setParentId(command.parentId);
@@ -276,7 +277,7 @@ public class OrderCommandService {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(addItemCommandToEntry.chatId);
         if (order == null) {
-            order = new DbEntityOrder();
+            order = new Order();
             order.setUserId(addItemCommandToEntry.getUserId());
             order.setDate(addItemCommandToEntry.getDate());
             order.setTime(addItemCommandToEntry.getTime());
