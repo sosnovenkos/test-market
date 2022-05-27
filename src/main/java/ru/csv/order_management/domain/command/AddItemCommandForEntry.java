@@ -2,6 +2,7 @@ package ru.csv.order_management.domain.command;
 
 import lombok.Builder;
 import lombok.Data;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.csv.order_management.service.OrderCommandService;
 
 @Data

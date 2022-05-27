@@ -13,6 +13,7 @@ public class ChooseTimeCommand implements Command {
     public String chatId;
     public OffsetDateTime date;
     public long parentId;
+    public Integer messageId;
 
     @Override
     public Long getId() {

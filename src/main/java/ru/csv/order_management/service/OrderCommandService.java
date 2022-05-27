@@ -1,6 +1,7 @@
 package ru.csv.order_management.service;
 
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -34,6 +35,7 @@ public class OrderCommandService {
     private static final List<String> NOT_DELETED_MESSAGES = List.of("Воспользуйтесь меню.");
     private static final List<String> TEMP_NOT_DELETED_MESSAGES = List.of("Нажимайте на позиции, чтобы ДОБАВИТЬ их в корзину");
 
+    @SneakyThrows
     public void handle(Command command) {
         command.handle(this);
     }
@@ -241,16 +243,18 @@ public class OrderCommandService {
         sender.delete(messagesToBeDeletedNow);
     }
 
-    public void handle(ChooseDateCommand command) throws TelegramApiException {
-        log.info("ChooseDate");
-        var x = OffsetDateTime.now().plusDays(1).getDayOfWeek().toString();
-        var y = OffsetDateTime.now().plusDays(1).getDayOfMonth();
-        var message = messageFactory.createMessage(command, OffsetDateTime.now());
-        sender.sendList(message);
-        log.info(x + y);
+    public void handle(ChooseDateCommand command){
+        var timeslots = timeslotRepository.findHeadGroup();
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(ChooseDateCommandContext.builder().command(command).timeslots(timeslots).build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
+//        var message = messageFactory.createMessage(command, OffsetDateTime.now());
+//        sender.sendList(message);
     }
 
-    public void handle(ChooseTimeCommand command) throws TelegramApiException {
+    public void handle(ChooseTimeCommand command) {
         log.info("ChooseTime");
         var x = OffsetDateTime.now();
         var timeslotsAll = timeslotRepository.findChildGroup(command.parentId);
@@ -267,27 +271,37 @@ public class OrderCommandService {
             }
             timeslotsAll.removeAll(timeslotsFind);
         }
-        var message = messageFactory.createMessageForChooseTime(command, timeslotsAll);
-        sender.sendList(message);
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(ChooseTimeCommandContext.builder().command(command).timeslots(timeslotsAll).build());
+        var messagesToBeDeletedNow = filter(messageToBeDeletedRepository.findAllByUserId(command.userId));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
+//        var message = messageFactory.createMessage(command, timeslotsAll);
+//        sender.sendList(message);
     }
 
-    public void handle (AddItemCommandForEntry addItemCommandToEntry) throws TelegramApiException {
-        log.info("addItemCommandToEntry: " + addItemCommandToEntry.toString());
-        var order = orderRepository.findOrderInCartStatus(addItemCommandToEntry.getUserId());
+    public void handle (AddItemCommandForEntry command){
+        log.info("addItemCommandToEntry: " + command.toString());
+        var order = orderRepository.findOrderInCartStatus(command.getUserId());
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(addItemCommandToEntry.chatId);
+        sendMessage.setChatId(command.chatId);
         if (order == null) {
             order = new Order();
-            order.setUserId(addItemCommandToEntry.getUserId());
-            order.setDate(addItemCommandToEntry.getDate());
-            order.setTime(addItemCommandToEntry.getTime());
-            order.setTimeslotId(addItemCommandToEntry.getTimeslotId());
+            order.setUserId(command.getUserId());
+            order.setDate(command.getDate());
+            order.setTime(command.getTime());
+            order.setTimeslotId(command.getTimeslotId());
             orderRepository.saveOrder(order);
-            sendMessage.setText("Вы успешно записаны");
-        } else {
-            sendMessage.setText("Запись уже существует");
+//            sendMessage.setText("Вы успешно записаны");
+//        } else {
+//            sendMessage.setText("Запись уже существует");
         }
-        sender.send(sendMessage);
+        var messagesToBeDeletedNextTime = sender.prepareAndSend(AddItemCommandForEntryContext.builder().command(command).order(order).build());
+        var messagesToBeDeletedNow = tempFilter(filter(messageToBeDeletedRepository.findAllByUserId(command.userId)));
+        messageToBeDeletedRepository.deleteAll(messagesToBeDeletedNow);
+        messageToBeDeletedRepository.save(messagesToBeDeletedNextTime);
+        sender.delete(messagesToBeDeletedNow);
+//        sender.send(sendMessage);
     }
 
     private List<MessageToBeDeleted> filter(List<MessageToBeDeleted> messagesToBeDeletedNow) {

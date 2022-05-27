@@ -157,9 +157,11 @@ public class MessageFactory {
         KeyboardButton price = new KeyboardButton("Прайс");
         KeyboardButton basket = new KeyboardButton("Корзина");
         KeyboardButton checkout = new KeyboardButton("Оформить заказ");
+        KeyboardButton choseTime = new KeyboardButton("Выбрать время");
         List<KeyboardButton> keyboardButtons1 = new ArrayList<>();
         keyboardButtons1.add(price);
         keyboardButtons1.add(basket);
+        keyboardButtons1.add(choseTime);
         List<KeyboardButton> keyboardButtons2 = new ArrayList<>();
         keyboardButtons2.add(checkout);
         keyboardButtons2.add(history);
@@ -265,12 +267,12 @@ public class MessageFactory {
                 .build());
     }
 
-    public List<SendMessage> createMessage(ChooseDateCommand command, OffsetDateTime date){
+    public List<SendMessage> createMessages(ChooseDateCommandContext context){
         log.info("createMessageForChooseDate");
+        var date = OffsetDateTime.now();
         SendMessage sendMessage = new SendMessage();
-
-        sendMessage.setChatId(command.chatId);
         sendMessage.setText("Выберите желаемую дату");
+        sendMessage.setChatId(context.command.chatId);
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
@@ -298,22 +300,24 @@ public class MessageFactory {
         return sendMessageList;
     }
 
-    public List<SendMessage> createMessageForChooseTime(ChooseTimeCommand command, List<Timeslot> timeslots){
+
+    public List<SendMessage> createMessages(ChooseTimeCommandContext context){
         log.info("createMessageForChooseTime");
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(command.chatId);
-        sendMessage.setText(command.getDate().getDayOfWeek().getDisplayName(TextStyle.FULL,
-                Locale.getDefault()) + " " + command.getDate().getDayOfMonth() + " " + command.getDate().getMonth().getDisplayName(TextStyle.FULL,
+        sendMessage.setText("Выберите время");
+        sendMessage.setChatId(context.command.chatId);
+        sendMessage.setText(context.command.getDate().getDayOfWeek().getDisplayName(TextStyle.FULL,
+                Locale.getDefault()) + " " + context.command.getDate().getDayOfMonth() + " " + context.command.getDate().getMonth().getDisplayName(TextStyle.FULL,
                 Locale.getDefault()) + "\n" + "Выберите время");
         List<SendMessage> sendMessageList = new ArrayList<>();
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-        for (int i = 0; i < timeslots.size(); i++) {
+        for (int i = 0; i < context.timeslots.size(); i++) {
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(
-                    timeslots.get(i).getTimeslot()
+                    context.timeslots.get(i).getTimeslot()
             );
-            var cbd = "ADD_TO_CART_FOR_ENTRY:" + command.getDate().toString().split("T")[0] + ":" + timeslots.get(i).getTimeslot() + ":" + timeslots.get(i).getId();
-            log.info("ADD_TO_CART_FOR_ENTRY:" + command.getDate().toString().split("T")[0] + ":" + timeslots.get(i).getTimeslot() + ":" + timeslots.get(i).getId());
+            var cbd = "ADD_TO_CART_FOR_ENTRY:" + context.command.getDate().toString().split("T")[0] + ":" + context.timeslots.get(i).getTimeslot() + ":" + context.timeslots.get(i).getId();
+            log.info("ADD_TO_CART_FOR_ENTRY:" + context.command.getDate().toString().split("T")[0] + ":" + context.timeslots.get(i).getTimeslot() + ":" + context.timeslots.get(i).getId());
 
             inlineKeyboardButton.setCallbackData(cbd);
             inlineKeyboardButton.getSwitchInlineQuery();
@@ -327,4 +331,17 @@ public class MessageFactory {
         log.info("sendMessageList size" + sendMessageList.size());
         return sendMessageList;
     }
+
+    public List<SendMessage> createMessages(AddItemCommandForEntryContext context) {
+        var sendMessageBuilder = SendMessage.builder();
+        sendMessageBuilder.chatId(context.command.chatId);
+        if (context.order != null) {
+            sendMessageBuilder.text("Вы успешно записаны");
+        } else {
+            sendMessageBuilder.text("Запись уже существует");
+        }
+
+        return List.of(sendMessageBuilder.build());
+    }
+
 }

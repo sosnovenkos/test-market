@@ -9,6 +9,7 @@ import ru.csv.order_management.service.OrderCommandService;
 public class ChooseDateCommand implements Command {
     public long userId;
     public String chatId;
+    public Integer messageId;
 
     @Override
     public Long getId() {
